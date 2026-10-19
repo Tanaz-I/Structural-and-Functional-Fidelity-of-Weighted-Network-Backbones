@@ -1,0 +1,1038 @@
+{
+ "generated": "2026-10-19T21:20:41",
+ "protocol_status": "draft",
+ "confirmatory": false,
+ "networks": [
+  "hospital"
+ ],
+ "n_networks": 1,
+ "n_synthetic": 0,
+ "thresholds": {
+  "tau_s": 0.8,
+  "tau_f": 0.6
+ },
+ "verdicts": [
+  {
+   "id": "H1",
+   "statement": "At comparable budgets, weight thresholding and the disparity filter preserve spreading less well than shortest-path-based methods (SMDS, HSS) on contact networks.",
+   "rule": "all paired one-sided Wilcoxon tests (gap and skill; SMDS, HSS vs W, DF) significant after Holm correction",
+   "verdict": "inconclusive",
+   "observed": {
+    "tests_supported": "1/8",
+    "median_effects": {
+     "SMDS-W-spread-gap": 0.0512,
+     "SMDS-W-spread-skill": 0.4642,
+     "SMDS-DF-spread-gap": 0.0447,
+     "SMDS-DF-spread-skill": 0.1531,
+     "HSS-W-spread-gap": 0.0298,
+     "HSS-W-spread-skill": 0.3842,
+     "HSS-DF-spread-gap": -0.0123,
+     "HSS-DF-spread-skill": 0.0169
+    }
+   },
+   "n_networks": 1,
+   "caveats": [
+    "Wilcoxon over (network, budget) cells: cells of one network are not independent, so p-values are optimistic",
+    "not robust: verdict changes under sir"
+   ],
+   "source_tables": [
+    "e4_h1"
+   ]
+  },
+  {
+   "id": "H2",
+   "statement": "The metric backbone preserves community structure on contact networks.",
+   "rule": "mean F_comm of SMDS at the metric-backbone size, 99% CI lower limit >= 0.6",
+   "verdict": "inconclusive",
+   "observed": {
+    "mean_F_comm": 0.658,
+    "ci": [
+     0.658,
+     0.658
+    ]
+   },
+   "n_networks": 1,
+   "caveats": [
+    "only 1 independent networks (< 5): downgraded to inconclusive"
+   ],
+   "source_tables": [
+    "e4_h2"
+   ]
+  },
+  {
+   "id": "H3",
+   "statement": "Where spreading preservation fails, bridging edges between communities have been lost disproportionately.",
+   "rule": "negative bridge_ratio coefficient, Holm-adjusted likelihood-ratio test p < 0.05, for spreading and communities",
+   "verdict": "inconclusive",
+   "observed": {
+    "spread": {
+     "coef": 0.1374,
+     "ci": [
+      -0.8169,
+      1.0918
+     ],
+     "p_lr_holm": 0.0,
+     "supported": false
+    },
+    "comm": {
+     "coef": 2.8514,
+     "ci": [
+      1.4563,
+      4.2465
+     ],
+     "p_lr_holm": 0.0002,
+     "supported": false
+    }
+   },
+   "n_networks": 1,
+   "caveats": [
+    "associational: regression on real networks does not establish causation",
+    "only 1 independent networks (< 5): downgraded to inconclusive"
+   ],
+   "source_tables": [
+    "e3_bridge"
+   ]
+  },
+  {
+   "id": "RQ1",
+   "statement": "Structural fidelity agrees only weakly with functional fidelity when ranking methods.",
+   "rule": "mean Kendall tau-b and the 99% CI upper limit below 0.6 for >= 2 of 4 functions",
+   "verdict": "inconclusive",
+   "observed": {
+    "comm": {
+     "mean_tau": -0.117,
+     "ci": [
+      -0.117,
+      -0.117
+     ]
+    },
+    "path": {
+     "mean_tau": 0.572,
+     "ci": [
+      0.572,
+      0.572
+     ]
+    },
+    "rank": {
+     "mean_tau": 0.15,
+     "ci": [
+      0.15,
+      0.15
+     ]
+    },
+    "spread": {
+     "mean_tau": 0.45,
+     "ci": [
+      0.45,
+      0.45
+     ]
+    }
+   },
+   "n_networks": 1,
+   "caveats": [
+    "only 1 independent networks (< 5): downgraded to inconclusive"
+   ],
+   "source_tables": [
+    "e1_summary"
+   ]
+  },
+  {
+   "id": "RQ3",
+   "statement": "Weight heterogeneity and weight-degree coupling hurt weight-based filters more than SMDS.",
+   "rule": "wb:sigma and wb:coupling interaction CIs above zero (spreading)",
+   "verdict": "not_run",
+   "observed": {},
+   "n_networks": 0,
+   "caveats": [
+    "synthetic factorial sweep not run yet"
+   ],
+   "source_tables": []
+  },
+  {
+   "id": "RQ4",
+   "statement": "No single method wins on all four functions.",
+   "rule": "share of cells with different best methods; 99% CI lower limit above 0.5",
+   "verdict": "inconclusive",
+   "observed": {
+    "share": 1.0,
+    "ci": [
+     1.0,
+     1.0
+    ]
+   },
+   "n_networks": 1,
+   "caveats": [
+    "only 1 independent networks (< 5): downgraded to inconclusive"
+   ],
+   "source_tables": [
+    "e4_h5"
+   ]
+  }
+ ],
+ "findings": [
+  {
+   "kind": "agreement",
+   "strength": "confirmatory-pending",
+   "figure": "atlas",
+   "text": "Structural fidelity weakly predicts community structure fidelity when ranking methods (mean Kendall tau -0.12, CI [-0.12, -0.12], 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "agreement",
+   "strength": "confirmatory-pending",
+   "figure": "atlas",
+   "text": "Structural fidelity weakly predicts node rankings fidelity when ranking methods (mean Kendall tau 0.15, CI [0.15, 0.15], 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "agreement",
+   "strength": "confirmatory-pending",
+   "figure": "atlas",
+   "text": "Structural fidelity weakly predicts spreading fidelity when ranking methods (mean Kendall tau 0.45, CI [0.45, 0.45], 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "agreement",
+   "strength": "confirmatory-pending",
+   "figure": "atlas",
+   "text": "Structural fidelity weakly predicts shortest paths fidelity when ranking methods (mean Kendall tau 0.57, CI [0.57, 0.57], 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "failure",
+   "strength": "exploratory",
+   "figure": "atlas",
+   "text": "wEffRes fails on spreading in 25% of cases where the structural check looked fine (pooled over budgets, 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "failure",
+   "strength": "exploratory",
+   "figure": "atlas",
+   "text": "DF fails on spreading in 25% of cases where the structural check looked fine (pooled over budgets, 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "failure",
+   "strength": "exploratory",
+   "figure": "atlas",
+   "text": "NC fails on spreading in 25% of cases where the structural check looked fine (pooled over budgets, 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "failure",
+   "strength": "exploratory",
+   "figure": "atlas",
+   "text": "DF fails on shortest paths in 25% of cases where the structural check looked fine (pooled over budgets, 1 networks).",
+   "n_networks": 1
+  },
+  {
+   "kind": "failure",
+   "strength": "exploratory",
+   "figure": "atlas",
+   "text": "The lowest failure rate is DF on community structure (0%).",
+   "n_networks": 1
+  },
+  {
+   "kind": "failure",
+   "strength": "exploratory",
+   "figure": "atlas",
+   "text": "The reverse case (structure poor but function preserved) occurs in 0.0% of cases; the misleading-pass case occurs in 8.9%.",
+   "n_networks": 1
+  },
+  {
+   "kind": "beyond_chance",
+   "strength": "exploratory",
+   "figure": "curves",
+   "text": "W is no better than weight-proportional random removal on spreading in 62% of (network, budget) cells.",
+   "n_networks": 1
+  },
+  {
+   "kind": "beyond_chance",
+   "strength": "exploratory",
+   "figure": "curves",
+   "text": "W is no better than weight-proportional random removal on node rankings in 50% of (network, budget) cells.",
+   "n_networks": 1
+  },
+  {
+   "kind": "beyond_chance",
+   "strength": "exploratory",
+   "figure": "curves",
+   "text": "HSS is no better than weight-proportional random removal on community structure in 25% of (network, budget) cells.",
+   "n_networks": 1
+  },
+  {
+   "kind": "beyond_chance",
+   "strength": "exploratory",
+   "figure": "curves",
+   "text": "NC is no better than weight-proportional random removal on node rankings in 25% of (network, budget) cells.",
+   "n_networks": 1
+  },
+  {
+   "kind": "beyond_chance",
+   "strength": "exploratory",
+   "figure": "curves",
+   "text": "NC is no better than weight-proportional random removal on spreading in 25% of (network, budget) cells.",
+   "n_networks": 1
+  },
+  {
+   "kind": "method_choice",
+   "strength": "exploratory",
+   "figure": "leaderboard",
+   "text": "For spreading the best average method is HSS in the sparse (5-15% of edges) regime, SMDS in the moderate (20-40%) regime, wEffRes in the dense (50-70%) regime.",
+   "n_networks": 1
+  },
+  {
+   "kind": "method_choice",
+   "strength": "exploratory",
+   "figure": "leaderboard",
+   "text": "For community structure the best average method is DF in the sparse (5-15% of edges) regime, wEffRes in the moderate (20-40%) regime, wEffRes in the dense (50-70%) regime.",
+   "n_networks": 1
+  },
+  {
+   "kind": "method_choice",
+   "strength": "exploratory",
+   "figure": "leaderboard",
+   "text": "For shortest paths the best average method is HSS in the sparse (5-15% of edges) regime, HSS in the moderate (20-40%) regime, HSS in the dense (50-70%) regime.",
+   "n_networks": 1
+  },
+  {
+   "kind": "method_choice",
+   "strength": "exploratory",
+   "figure": "leaderboard",
+   "text": "For node rankings the best average method is HSS in the sparse (5-15% of edges) regime, HSS in the moderate (20-40%) regime, HSS in the dense (50-70%) regime.",
+   "n_networks": 1
+  },
+  {
+   "kind": "robustness",
+   "strength": "exploratory",
+   "figure": "conclusions",
+   "text": "The verdict on structure-versus-function agreement (RQ1) is unchanged under all 9 modelling variants.",
+   "n_networks": 1
+  },
+  {
+   "kind": "robustness",
+   "strength": "exploratory",
+   "figure": "conclusions",
+   "text": "The verdict on the path-based advantage over W and DF (H1) changes under: sir.",
+   "n_networks": 1
+  },
+  {
+   "kind": "robustness",
+   "strength": "exploratory",
+   "figure": "conclusions",
+   "text": "The verdict on function dependence of the best method (RQ4) is unchanged under all 9 modelling variants.",
+   "n_networks": 1
+  },
+  {
+   "kind": "robustness",
+   "strength": "exploratory",
+   "figure": "conclusions",
+   "text": "The best method on spreading fidelity depends on the modelling choice: it changes under sir, proximity_max, half_time_40.",
+   "n_networks": 1
+  },
+  {
+   "kind": "robustness",
+   "strength": "exploratory",
+   "figure": "conclusions",
+   "text": "The best method on community fidelity depends on the modelling choice: it changes under louvain_res_0.5.",
+   "n_networks": 1
+  }
+ ],
+ "summary": {
+  "answer": "The evidence on whether structural fidelity predicts functional fidelity is mixed.",
+  "why": [
+   "The bridge explanation is supported for some functions only.",
+   "RQ3 has not been run yet."
+  ],
+  "methods": [
+   "Path-based methods beat the weight-based filters on some, not all, measures.",
+   "Whether the metric backbone preserves community structure is unclear.",
+   "Whether one method can win on every function is unclear."
+  ],
+  "limits": [
+   "1 real networks and 0 synthetic networks; claims hold only for these domains and sizes.",
+   "SI spreading with one weight-to-probability map; static, undirected networks.",
+   "Verdicts are confirmatory only if the protocol was frozen before the runs; otherwise they are exploratory."
+  ],
+  "guidance": [
+   "spread/sparse (5-15% of edges): prefer HSS (margin over SMDS: 0.06 skill)",
+   "comm/sparse (5-15% of edges): prefer DF (margin over SMDS: 0.00 skill)",
+   "path/sparse (5-15% of edges): prefer HSS (margin over SMDS: 0.21 skill)",
+   "rank/sparse (5-15% of edges): prefer HSS (margin over SMDS: 0.21 skill)",
+   "spread/moderate (20-40%): prefer SMDS (margin over wEffRes: 0.02 skill)",
+   "comm/moderate (20-40%): prefer wEffRes (margin over DF: 0.09 skill)",
+   "path/moderate (20-40%): prefer HSS (margin over SMDS: 0.00 skill)",
+   "rank/moderate (20-40%): prefer HSS (margin over SMDS: 0.09 skill)",
+   "spread/dense (50-70%): prefer wEffRes (margin over SMDS: 0.00 skill)",
+   "comm/dense (50-70%): prefer wEffRes (margin over DF: 0.03 skill)",
+   "path/dense (50-70%): prefer HSS (margin over SMDS: 0.00 skill)",
+   "rank/dense (50-70%): prefer HSS (margin over SMDS: 0.05 skill)"
+  ]
+ },
+ "tables": {
+  "agreement": [
+   {
+    "function": "comm",
+    "mean_tau": -0.1167,
+    "ci_lo": -0.1167,
+    "ci_hi": -0.1167,
+    "n_networks": 1,
+    "n_cells": 8,
+    "below_threshold": true
+   },
+   {
+    "function": "path",
+    "mean_tau": 0.5722,
+    "ci_lo": 0.5722,
+    "ci_hi": 0.5722,
+    "n_networks": 1,
+    "n_cells": 8,
+    "below_threshold": true
+   },
+   {
+    "function": "rank",
+    "mean_tau": 0.15,
+    "ci_lo": 0.15,
+    "ci_hi": 0.15,
+    "n_networks": 1,
+    "n_cells": 8,
+    "below_threshold": true
+   },
+   {
+    "function": "spread",
+    "mean_tau": 0.45,
+    "ci_lo": 0.45,
+    "ci_hi": 0.45,
+    "n_networks": 1,
+    "n_cells": 8,
+    "below_threshold": true
+   }
+  ],
+  "leaderboard": [
+   {
+    "method": "DF",
+    "function": "comm",
+    "mean_skill": 0.4183,
+    "ci_lo": 0.4183,
+    "ci_hi": 0.4183,
+    "n_networks": 1
+   },
+   {
+    "method": "DF",
+    "function": "path",
+    "mean_skill": 0.5326,
+    "ci_lo": 0.5326,
+    "ci_hi": 0.5326,
+    "n_networks": 1
+   },
+   {
+    "method": "DF",
+    "function": "rank",
+    "mean_skill": 0.2706,
+    "ci_lo": 0.2706,
+    "ci_hi": 0.2706,
+    "n_networks": 1
+   },
+   {
+    "method": "DF",
+    "function": "spread",
+    "mean_skill": 0.3156,
+    "ci_lo": 0.3156,
+    "ci_hi": 0.3156,
+    "n_networks": 1
+   },
+   {
+    "method": "HSS",
+    "function": "comm",
+    "mean_skill": 0.2334,
+    "ci_lo": 0.2334,
+    "ci_hi": 0.2334,
+    "n_networks": 1
+   },
+   {
+    "method": "HSS",
+    "function": "path",
+    "mean_skill": 0.8473,
+    "ci_lo": 0.8473,
+    "ci_hi": 0.8473,
+    "n_networks": 1
+   },
+   {
+    "method": "HSS",
+    "function": "rank",
+    "mean_skill": 0.4903,
+    "ci_lo": 0.4903,
+    "ci_hi": 0.4903,
+    "n_networks": 1
+   },
+   {
+    "method": "HSS",
+    "function": "spread",
+    "mean_skill": 0.3328,
+    "ci_lo": 0.3328,
+    "ci_hi": 0.3328,
+    "n_networks": 1
+   },
+   {
+    "method": "NC",
+    "function": "comm",
+    "mean_skill": 0.263,
+    "ci_lo": 0.263,
+    "ci_hi": 0.263,
+    "n_networks": 1
+   },
+   {
+    "method": "NC",
+    "function": "path",
+    "mean_skill": 0.722,
+    "ci_lo": 0.722,
+    "ci_hi": 0.722,
+    "n_networks": 1
+   },
+   {
+    "method": "NC",
+    "function": "rank",
+    "mean_skill": 0.1615,
+    "ci_lo": 0.1615,
+    "ci_hi": 0.1615,
+    "n_networks": 1
+   },
+   {
+    "method": "NC",
+    "function": "spread",
+    "mean_skill": 0.2891,
+    "ci_lo": 0.2891,
+    "ci_hi": 0.2891,
+    "n_networks": 1
+   },
+   {
+    "method": "SMDS",
+    "function": "comm",
+    "mean_skill": 0.3474,
+    "ci_lo": 0.3474,
+    "ci_hi": 0.3474,
+    "n_networks": 1
+   },
+   {
+    "method": "SMDS",
+    "function": "path",
+    "mean_skill": 0.7667,
+    "ci_lo": 0.7667,
+    "ci_hi": 0.7667,
+    "n_networks": 1
+   },
+   {
+    "method": "SMDS",
+    "function": "rank",
+    "mean_skill": 0.3639,
+    "ci_lo": 0.3639,
+    "ci_hi": 0.3639,
+    "n_networks": 1
+   },
+   {
+    "method": "SMDS",
+    "function": "spread",
+    "mean_skill": 0.4227,
+    "ci_lo": 0.4227,
+    "ci_hi": 0.4227,
+    "n_networks": 1
+   },
+   {
+    "method": "W",
+    "function": "comm",
+    "mean_skill": 0.2659,
+    "ci_lo": 0.2659,
+    "ci_hi": 0.2659,
+    "n_networks": 1
+   },
+   {
+    "method": "W",
+    "function": "path",
+    "mean_skill": 0.2282,
+    "ci_lo": 0.2282,
+    "ci_hi": 0.2282,
+    "n_networks": 1
+   },
+   {
+    "method": "W",
+    "function": "rank",
+    "mean_skill": 0.0426,
+    "ci_lo": 0.0426,
+    "ci_hi": 0.0426,
+    "n_networks": 1
+   },
+   {
+    "method": "W",
+    "function": "spread",
+    "mean_skill": -0.0395,
+    "ci_lo": -0.0395,
+    "ci_hi": -0.0395,
+    "n_networks": 1
+   },
+   {
+    "method": "wEffRes",
+    "function": "comm",
+    "mean_skill": 0.4197,
+    "ci_lo": 0.4197,
+    "ci_hi": 0.4197,
+    "n_networks": 1
+   },
+   {
+    "method": "wEffRes",
+    "function": "path",
+    "mean_skill": 0.7523,
+    "ci_lo": 0.7523,
+    "ci_hi": 0.7523,
+    "n_networks": 1
+   },
+   {
+    "method": "wEffRes",
+    "function": "rank",
+    "mean_skill": 0.1537,
+    "ci_lo": 0.1537,
+    "ci_hi": 0.1537,
+    "n_networks": 1
+   },
+   {
+    "method": "wEffRes",
+    "function": "spread",
+    "mean_skill": 0.3578,
+    "ci_lo": 0.3578,
+    "ci_hi": 0.3578,
+    "n_networks": 1
+   }
+  ],
+  "regimes": [
+   {
+    "regime": "sparse (5-15% of edges)",
+    "function": "spread",
+    "best": "HSS",
+    "mean_skill": 0.1413,
+    "runner_up": "SMDS",
+    "margin": 0.0576
+   },
+   {
+    "regime": "sparse (5-15% of edges)",
+    "function": "comm",
+    "best": "DF",
+    "mean_skill": 0.2751,
+    "runner_up": "SMDS",
+    "margin": 0.0046
+   },
+   {
+    "regime": "sparse (5-15% of edges)",
+    "function": "path",
+    "best": "HSS",
+    "mean_skill": 0.5927,
+    "runner_up": "SMDS",
+    "margin": 0.2149
+   },
+   {
+    "regime": "sparse (5-15% of edges)",
+    "function": "rank",
+    "best": "HSS",
+    "mean_skill": 0.4217,
+    "runner_up": "SMDS",
+    "margin": 0.2137
+   },
+   {
+    "regime": "moderate (20-40%)",
+    "function": "spread",
+    "best": "SMDS",
+    "mean_skill": 0.519,
+    "runner_up": "wEffRes",
+    "margin": 0.015
+   },
+   {
+    "regime": "moderate (20-40%)",
+    "function": "comm",
+    "best": "wEffRes",
+    "mean_skill": 0.5626,
+    "runner_up": "DF",
+    "margin": 0.0862
+   },
+   {
+    "regime": "moderate (20-40%)",
+    "function": "path",
+    "best": "HSS",
+    "mean_skill": 1.0,
+    "runner_up": "SMDS",
+    "margin": 0.0
+   },
+   {
+    "regime": "moderate (20-40%)",
+    "function": "rank",
+    "best": "HSS",
+    "mean_skill": 0.5992,
+    "runner_up": "SMDS",
+    "margin": 0.0895
+   },
+   {
+    "regime": "dense (50-70%)",
+    "function": "spread",
+    "best": "wEffRes",
+    "mean_skill": 0.7917,
+    "runner_up": "SMDS",
+    "margin": 0.0048
+   },
+   {
+    "regime": "dense (50-70%)",
+    "function": "comm",
+    "best": "wEffRes",
+    "mean_skill": 0.5723,
+    "runner_up": "DF",
+    "margin": 0.0263
+   },
+   {
+    "regime": "dense (50-70%)",
+    "function": "path",
+    "best": "HSS",
+    "mean_skill": 1.0,
+    "runner_up": "SMDS",
+    "margin": 0.0
+   },
+   {
+    "regime": "dense (50-70%)",
+    "function": "rank",
+    "best": "HSS",
+    "mean_skill": 0.4299,
+    "runner_up": "SMDS",
+    "margin": 0.0507
+   }
+  ],
+  "replication": [
+   {
+    "source": "Pereira et al. 2026 / Soriano-Panos et al. 2025",
+    "claim": "SMDS preserves spreading better than W on contact networks",
+    "ours": "median F_spread difference +0.169, SMDS higher in 100% of 5 cells (1 contact networks)",
+    "agrees": true,
+    "n_networks": 1
+   },
+   {
+    "source": "Pereira et al. 2026 / Soriano-Panos et al. 2025",
+    "claim": "SMDS preserves spreading better than DF on contact networks",
+    "ours": "median F_spread difference +0.045, SMDS higher in 80% of 5 cells (1 contact networks)",
+    "agrees": true,
+    "n_networks": 1
+   },
+   {
+    "source": "Correia et al. 2023",
+    "claim": "metric-backbone-sized SMDS keeps community structure in contact networks",
+    "ours": "mean F_comm of SMDS above the metric size 0.81",
+    "agrees": true,
+    "n_networks": 1
+   }
+  ],
+  "h1": [
+   {
+    "challenger": "SMDS",
+    "baseline": "W",
+    "function": "spread",
+    "measure": "gap",
+    "median_diff": 0.05115,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.19141,
+    "p_holm": 0.76562,
+    "supported": false
+   },
+   {
+    "challenger": "SMDS",
+    "baseline": "W",
+    "function": "spread",
+    "measure": "skill",
+    "median_diff": 0.4642,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.00391,
+    "p_holm": 0.03125,
+    "supported": true
+   },
+   {
+    "challenger": "SMDS",
+    "baseline": "DF",
+    "function": "spread",
+    "measure": "gap",
+    "median_diff": 0.04472,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.00781,
+    "p_holm": 0.05469,
+    "supported": false
+   },
+   {
+    "challenger": "SMDS",
+    "baseline": "DF",
+    "function": "spread",
+    "measure": "skill",
+    "median_diff": 0.15314,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.02734,
+    "p_holm": 0.13672,
+    "supported": false
+   },
+   {
+    "challenger": "HSS",
+    "baseline": "W",
+    "function": "spread",
+    "measure": "gap",
+    "median_diff": 0.02982,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.47266,
+    "p_holm": 1.0,
+    "supported": false
+   },
+   {
+    "challenger": "HSS",
+    "baseline": "W",
+    "function": "spread",
+    "measure": "skill",
+    "median_diff": 0.38424,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.00781,
+    "p_holm": 0.05469,
+    "supported": false
+   },
+   {
+    "challenger": "HSS",
+    "baseline": "DF",
+    "function": "spread",
+    "measure": "gap",
+    "median_diff": -0.01226,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.67969,
+    "p_holm": 1.0,
+    "supported": false
+   },
+   {
+    "challenger": "HSS",
+    "baseline": "DF",
+    "function": "spread",
+    "measure": "skill",
+    "median_diff": 0.01687,
+    "n_cells": 8,
+    "n_networks": 1,
+    "p": 0.37109,
+    "p_holm": 1.0,
+    "supported": false
+   }
+  ],
+  "h2": {
+   "mean": 0.6583779547516942,
+   "ci_lo": 0.6583779547516942,
+   "ci_hi": 0.6583779547516942,
+   "n_networks": 1,
+   "threshold": 0.6
+  },
+  "bridge": [
+   {
+    "function": "spread",
+    "coef_bridge_ratio": 0.13742,
+    "ci_lo": -0.81692,
+    "ci_hi": 1.09176,
+    "p_coef": 0.77777,
+    "coef_hub": -1.44946,
+    "lr_stat": 21.61016,
+    "p_lr": 2e-05,
+    "n_networks": 1,
+    "n_obs": 48,
+    "p_lr_holm": 4e-05,
+    "predicted_sign": false,
+    "supported": false
+   },
+   {
+    "function": "comm",
+    "coef_bridge_ratio": 2.85142,
+    "ci_lo": 1.45631,
+    "ci_hi": 4.24653,
+    "p_coef": 6e-05,
+    "coef_hub": 0.60539,
+    "lr_stat": 17.3269,
+    "p_lr": 0.00017,
+    "n_networks": 1,
+    "n_obs": 48,
+    "p_lr_holm": 0.00017,
+    "predicted_sign": false,
+    "supported": false
+   }
+  ],
+  "heterogeneity": null,
+  "robustness": [
+   {
+    "variant": "default",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "sir",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": false,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "W",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": true,
+    "RQ4_changed": false,
+    "best_spread_changed": true,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "proximity_max",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "HSS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": true,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "half_time_10",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "half_time_40",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "HSS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": true,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "epsilon_0.05",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "epsilon_0.2",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "louvain_res_0.5",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "DF",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": true,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "louvain_res_2",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   },
+   {
+    "variant": "seeds_uniform",
+    "RQ1 (>=2 functions with mean tau < 0.6)": true,
+    "H1 direction (SMDS, HSS > W, DF)": true,
+    "RQ4 (> 50% cells differ)": true,
+    "best_spread": "SMDS",
+    "best_comm": "wEffRes",
+    "best_path": "HSS",
+    "best_rank": "HSS",
+    "RQ1_changed": false,
+    "H1_changed": false,
+    "RQ4_changed": false,
+    "best_spread_changed": false,
+    "best_comm_changed": false,
+    "best_path_changed": false,
+    "best_rank_changed": false
+   }
+  ]
+ }
+}

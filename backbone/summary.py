@@ -48,14 +48,15 @@ def auc(X, y, lo):
         return float("nan")
     xs = np.concatenate([[lo], X[X > lo]])
     ys = np.concatenate([[np.interp(lo, X, y)], y[X > lo]])
-    return float(np.trapezoid(ys, xs) / (1 - lo))
+    trapezoid = getattr(np, "trapezoid", None) or np.trapz  # numpy 2 renamed trapz
+    return float(trapezoid(ys, xs) / (1 - lo))
 
 
-def auc_table(rho_df, si_df, x_metric, limits=None, fixed_limit=None):
+def auc_table(rho_df, si_df, x_metric, limits=None, fixed_limit=None, methods=METHODS):
     """AUC of rho_C, rho_t and xi^-1_0.5 per method. With `limits` (method -> connectivity limit) each method uses
     its own X-tilde; with `fixed_limit` every method uses that same limit."""
     rows = []
-    for m in METHODS:
+    for m in methods:
         lo = fixed_limit if fixed_limit is not None else x_tilde(limits[m], x_metric)
         c, s = rho_df[rho_df.method == m], si_df[si_df.method == m]
         rows.append((m, lo, auc(c.X, c.rho_C, lo), auc(s.X, s.rho_t, lo), auc(s.X, s.xi, lo)))
@@ -90,28 +91,3 @@ def optimal_lambda(lam_df, scenarios=SCENARIOS):
         rows.append((name, wc, wt, wx, wX, b.lam, b.n_edges, b.X, b.rho_C, b.rho_t, b.xi, obj.max()))
     return pd.DataFrame(rows, columns=["scenario", "w_C", "w_t", "w_xi", "w_X", "lam_opt", "n_edges", "X",
                                        "rho_C", "rho_t", "xi", "objective"])
-
-
-def cross_network_tests(auc_all):
-    """DBS against each other method across networks, for each AUC measure.
-    auc_all has columns network, method, AUC_rho_C, AUC_rho_t, AUC_xi.
-    Mann-Whitney U (one-sided, DBS larger) is what the paper uses; the paired Wilcoxon signed-rank test
-    (one-sided) uses the fact that the same networks are compared."""
-    from scipy.stats import mannwhitneyu, wilcoxon
-
-    rows = []
-    for col in ["AUC_rho_C", "AUC_rho_t", "AUC_xi"]:
-        wide = auc_all.pivot(index="network", columns="method", values=col)
-        for m in METHODS:
-            if m == "DBS":
-                continue
-            d = wide["DBS"] - wide[m]
-            mw = mannwhitneyu(wide["DBS"], wide[m], alternative="greater").pvalue
-            try:
-                wx = wilcoxon(wide["DBS"], wide[m], alternative="greater").pvalue
-            except ValueError:  # all differences zero
-                wx = float("nan")
-            rows.append((col, m, len(wide), wide["DBS"].median(), wide[m].median(),
-                         float(d.mean()), int((d > 0).sum()), mw, wx))
-    return pd.DataFrame(rows, columns=["measure", "versus", "n_networks", "median_DBS", "median_other",
-                                       "mean_diff", "networks_DBS_better", "p_mannwhitney", "p_wilcoxon"])

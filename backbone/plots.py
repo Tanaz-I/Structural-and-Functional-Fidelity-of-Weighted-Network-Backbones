@@ -34,7 +34,7 @@ def _save(fig, path):
     plt.close(fig)
 
 
-def curves(rho_df, si_df, x_metric, path):
+def curves(rho_df, si_df, x_metric, path, network="hospital"):
     """rho_C, rho_t and xi^-1_0.5 versus adjusted size X, one line per method (cf. paper Fig. 4)."""
     fig, axes = plt.subplots(1, 3, figsize=(14, 4.2), sharex=True)
     panels = [(rho_df, "rho_C", r"$\rho_C$  eigenvector-centrality rank"),
@@ -53,7 +53,7 @@ def curves(rho_df, si_df, x_metric, path):
                  transform=axes[0].get_xaxis_transform())
     axes[0].set_ylabel("preserved (1 = identical)")
     axes[0].legend(frameon=False, loc="lower right")
-    fig.suptitle("Hospital network: fidelity of each sparsification versus network size", x=0.01, ha="left",
+    fig.suptitle(f"{network}: fidelity of each sparsification versus network size", x=0.01, ha="left",
                  fontsize=12, fontweight="bold", y=1.03)
     _save(fig, path)
 
@@ -102,26 +102,25 @@ def lambda_curves(lam_df, opt_df, path):
     _save(fig, path)
 
 
-def auc_boxplots(auc_all, path, title):
-    """Distribution over networks of the AUC of each method, one dot per network (cf. paper Fig. 2)."""
-    fig, axes = plt.subplots(1, 3, figsize=(13, 4.2), sharey=True)
-    cols = [("AUC_rho_C", r"AUC($\rho_C$)"), ("AUC_rho_t", r"AUC($\rho_t$)"), ("AUC_xi", r"AUC($\xi^{-1}_{0.5}$)")]
-    methods = list(STYLE)[::-1]  # W ... DBS, as in the paper
-    for ax, (col, lab) in zip(axes, cols):
-        data = [auc_all[auc_all.method == m][col].to_numpy() for m in methods]
-        bp = ax.boxplot(data, positions=range(len(methods)), widths=0.55, patch_artist=True, showfliers=False,
-                        medianprops={"color": INK, "linewidth": 1.4}, whiskerprops={"color": INK2},
-                        capprops={"color": INK2}, boxprops={"edgecolor": INK2})
-        for patch, m in zip(bp["boxes"], methods):
-            patch.set_facecolor(STYLE[m][0])
-            patch.set_alpha(0.55)
-        rng = np.random.default_rng(0)
-        for k, d in enumerate(data):
-            ax.scatter(k + rng.uniform(-0.15, 0.15, len(d)), d, s=16, color=INK, zorder=3, edgecolor=SURFACE,
-                       linewidth=0.6)
-        ax.set_xticks(range(len(methods)), methods)
+def extension_bars(auc_df, path, title, reference="DBS"):
+    """Extension: AUC of rho_t and xi^-1 for W and DispFilt, plain, with a spanning tree (M+T) and with the metric backbone
+    first (M+B), against the reference (DBS). `auc_df` has columns method, AUC_rho_t, AUC_xi for one lower limit."""
+    a = auc_df.set_index("method")
+    bases = ("W", "DispFilt")
+    labels = ["plain", "+ spanning tree", "+ metric backbone"]
+    shades = [METRIC_COLOURS[3], METRIC_COLOURS[0], METRIC_COLOURS[2]]
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+    for ax, (col, lab) in zip(axes, [("AUC_rho_t", r"$\rho_t$  infection order"), ("AUC_xi", r"$\xi^{-1}_{0.5}$  timescale")]):
+        for g, base in enumerate(bases):
+            for k, m in enumerate([base, f"{base}+T", f"{base}+B"]):
+                ax.bar(g + (k - 1) * 0.25, a.loc[m, col], width=0.23, color=shades[k], zorder=3, edgecolor=SURFACE,
+                       label=labels[k] if g == 0 else None)
+        ax.axhline(a.loc[reference, col], color=INK2, lw=1.0, ls=(0, (4, 3)), zorder=2)
+        ax.text(1.45, a.loc[reference, col] + 0.004, reference, color=INK2, fontsize=8, ha="right")
+        ax.set_xticks(range(len(bases)), bases)
         ax.set_title(lab)
-        ax.set_ylim(0, 1.05)
+        ax.set_ylim(0.5, 1.0)
     axes[0].set_ylabel("area under the curve (1 = perfect)")
+    axes[0].legend(frameon=False, loc="lower right")
     fig.suptitle(title, x=0.01, ha="left", fontsize=12, fontweight="bold", y=1.03)
     _save(fig, path)

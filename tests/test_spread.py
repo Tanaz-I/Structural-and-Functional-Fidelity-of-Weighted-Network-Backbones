@@ -2,7 +2,9 @@ import numpy as np
 import pytest
 
 from backbone.backbones import edge_table
-from backbone.data import RAW_HOSPITAL, load_graph
+from backbone.data import NETWORKS, load_graph
+
+RAW_HOSPITAL = NETWORKS["hospital"][0]
 from backbone.spread import (calibrate_beta, choose_seeds, half_time, reference_runs, simulate,
                              spreading_fidelity)
 from backbone.sweep import Network, eigenvector_centrality
@@ -61,7 +63,7 @@ def test_calibrate_beta_hits_target():
 
 @pytest.mark.skipif(not RAW_HOSPITAL.exists(), reason="raw hospital data not present")
 def test_hospital_smoke():
-    net = Network(edge_table(load_graph()))
+    net = Network(edge_table(load_graph(RAW_HOSPITAL)))
     A = net.adjacency()
     seeds = choose_seeds(eigenvector_centrality(A))
     beta = calibrate_beta(A, seeds, 20.0, runs=30, iters=12)

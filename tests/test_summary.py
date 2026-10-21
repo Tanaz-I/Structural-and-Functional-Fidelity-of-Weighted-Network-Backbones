@@ -35,19 +35,6 @@ def test_connectivity_limits_on_toy_network():
     assert 0.0 <= lim["W"] <= 1.0
 
 
-def test_cross_network_tests_shape():
-    from backbone.summary import cross_network_tests
-    rows = []
-    for net in range(6):
-        for m, v in [("DBS", .9), ("SmD", .88), ("wEffRes", .85), ("DispFilt", .6), ("W", .5)]:
-            rows.append((f"n{net}", m, v + 0.01 * net, v, v))
-    df = pd.DataFrame(rows, columns=["network", "method", "AUC_rho_C", "AUC_rho_t", "AUC_xi"])
-    t = cross_network_tests(df)
-    assert len(t) == 3 * 4 and (t.networks_DBS_better >= 0).all()
-    w = t[(t.measure == "AUC_rho_C") & (t.versus == "W")].iloc[0]
-    assert w.p_wilcoxon < 0.05 and w.p_mannwhitney < 0.05
-
-
 def test_optimal_lambda_follows_weights():
     lam = pd.DataFrame({"lam": [0.1, 0.5, 5.0], "n_edges": [100, 50, 10], "X": [1.0, 0.4, 0.0],
                         "rho_C": [1.0, 0.8, 0.1], "rho_t": [1.0, 0.9, 0.2], "xi": [1.0, 0.7, 0.1]})

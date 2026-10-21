@@ -1,8 +1,18 @@
 .venv/
-results/
+results_quick/
 __pycache__/
 *.pyc
-ui/node_modules/
-ui/dist/
 .pytest_cache/
-data/raw/
+
+# results/: keep the summary tables, final figures and verdicts; leave out the raw sweeps and per-step curves
+# (python run.py regenerates them, and ui/data.js already carries the curves the dashboard needs)
+results/run_log.txt
+results/*/edge_scores.csv
+results/*/sweep_rhoC.csv
+results/*/sweep_si.csv
+results/*/lambda_sweep.csv
+results/*/extension/curves_*.csv
+results/*/diagnose/retention.csv
+results/*/diagnose/sparse_regime.csv
+results/*/sensitivity/*
+!results/*/sensitivity/sensitivity.csv

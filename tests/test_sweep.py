@@ -3,7 +3,9 @@ import numpy as np
 import pytest
 
 from backbone.backbones import edge_table
-from backbone.data import RAW_HOSPITAL, load_graph
+from backbone.data import NETWORKS, load_graph
+
+RAW_HOSPITAL = NETWORKS["hospital"][0]
 from backbone.sparsify import METHODS
 from backbone.sweep import Network, eigenvector_centrality, rho_C, sweep
 
@@ -45,7 +47,7 @@ def test_sweep_endpoints_and_grid():
 
 @pytest.mark.skipif(not RAW_HOSPITAL.exists(), reason="raw hospital data not present")
 def test_hospital_eigenvector_vs_networkx_and_endpoints():
-    net = Network(edge_table(load_graph()))
+    net = Network(edge_table(load_graph(RAW_HOSPITAL)))
     G = nx.Graph()
     for r in net.table.itertuples():
         G.add_edge(r.u, r.v, weight=r.proximity)

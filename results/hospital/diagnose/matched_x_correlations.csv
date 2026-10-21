@@ -1,0 +1,7 @@
+variable,versus,mean_spearman,n_budgets
+components,rho_t,-0.8248491766399674,15
+components,rho_C,0.7223793513707247,15
+bridge_retention,rho_t,0.50400453329291,18
+bridge_retention,rho_C,-0.20197274688444705,18
+strength_rho,rho_t,-0.5681548328149826,18
+strength_rho,rho_C,0.40647889032438655,18

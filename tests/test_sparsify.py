@@ -4,7 +4,9 @@ import pandas as pd
 import pytest
 
 from backbone.backbones import edge_table
-from backbone.data import RAW_HOSPITAL, load_graph
+from backbone.data import NETWORKS, load_graph
+
+RAW_HOSPITAL = NETWORKS["hospital"][0]
 from backbone.sparsify import (METHODS, disparity_alpha, edges_to_keep, importance, is_connected,
                                ranking, sparsify, weighted_effective_resistance)
 
@@ -57,7 +59,7 @@ def test_sparsify_sizes_and_seed():
 
 @pytest.mark.skipif(not RAW_HOSPITAL.exists(), reason="raw hospital data not present")
 def test_hospital_connectivity_guarantees():
-    G = load_graph()
+    G = load_graph(RAW_HOSPITAL)
     t = edge_table(G)
     nodes = sorted(G)
     n, m = 75, 1139

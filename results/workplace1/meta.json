@@ -1,0 +1,25 @@
+{
+  "network": "workplace1",
+  "nodes": 92,
+  "edges": 755,
+  "metric_edges": 179,
+  "metric_X_percent": 13.253,
+  "paper_nodes": 92,
+  "paper_edges": 755,
+  "paper_metric_X_percent": 20.63,
+  "X_conn": {
+    "W": 0.21987951807228914,
+    "DispFilt": 0.5240963855421686,
+    "wEffRes": 0.03463855421686747,
+    "SmD": 0.12048192771084337,
+    "DBS": 0.0
+  },
+  "balanced_lambda_opt": 0.6071966407771227,
+  "runs": 100,
+  "beta": 1.2329242785696979,
+  "beta_capped": false,
+  "target_half_time": 20.0,
+  "achieved_half_time": 20.0,
+  "n_seeds": 14,
+  "seconds": 2.0
+}

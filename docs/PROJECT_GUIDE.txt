@@ -1,0 +1,513 @@
+================================================================================
+PROJECT GUIDE
+Structural and Functional Fidelity of Weighted Network Backbones
+================================================================================
+
+Who this is for: someone who has never seen this project and wants to understand
+what it is, what was done, why, and what the results mean. Read it top to bottom.
+No prior knowledge of network backbones is assumed. Terms are explained the first
+time they appear and collected in the glossary (Section 11).
+
+Contents
+  1. The one-paragraph summary
+  2. The problem: what is a network backbone?
+  3. The base paper
+  4. The data
+  5. What we implemented (the replication)
+  6. How the results are measured
+  7. Results of the replication
+  8. The extension: why we went beyond the paper
+  9. Results of the extension
+ 10. Conclusion, limits, and what is NOT claimed
+ 11. Glossary
+ 12. How to run the code and where things are
+ 13. Honest status of the project
+
+
+--------------------------------------------------------------------------------
+1. THE ONE-PARAGRAPH SUMMARY
+--------------------------------------------------------------------------------
+
+Real networks (for example, who meets whom in a hospital) often have too many
+connections to analyse or visualise, so we want to throw away most of the
+connections and keep a small "backbone" that still behaves like the original.
+A recent paper (Pereira, Costa and Rocha, 2026) argues that a family of methods
+called "distance backbones" does this better than simpler methods such as
+"keep the strongest connections". We re-implemented the paper's five methods and
+tested its claims on two real contact networks. The paper's main claim about
+SPREADING (how fast an infection travels) held on both networks. Its claim
+about CENTRALITY (which people are most important) held only partly. We then ran
+an extension to find out WHY the simple methods spread badly: most of the damage
+turns out to come from the network falling apart into disconnected pieces, and
+simply guaranteeing connectivity repairs most (not all) of the problem.
+
+
+--------------------------------------------------------------------------------
+2. THE PROBLEM: WHAT IS A NETWORK BACKBONE?
+--------------------------------------------------------------------------------
+
+A weighted network is a set of nodes (people) joined by edges (contacts), where
+each edge has a weight (how strong or frequent the contact is).
+
+Dense networks are hard to study. "Sparsification" removes edges so that a
+smaller network remains: the BACKBONE. A good backbone is much smaller but keeps
+the properties we care about. The interesting question is: which properties?
+
+Two kinds of fidelity (faithfulness to the original) are used in this project.
+This split is OUR framing, not the paper's:
+
+  Structural fidelity  = properties computed from the static graph itself
+                         (who is central, is the graph still connected, are the
+                         links between groups kept).
+  Functional fidelity  = what happens when something actually runs on the
+                         network (an epidemic spreading through it).
+
+The central point of the project: a backbone can look good structurally and
+still behave badly functionally, and vice versa.
+
+Methods compared (the five from the paper's Table 2):
+
+  W         Weight threshold. Keep the edges with the largest weights.
+  DispFilt  Disparity filter. Keep edges that are statistically unusually strong
+            for their endpoints.
+  wEffRes   Weighted effective resistance. Keep edges that are important for the
+            electrical-flow connectivity of the graph.
+  SmD       Semi-metric distortion. Remove edges that are "shortcut-able": an
+            edge is distorted if a path through other nodes is shorter than the
+            edge itself.
+  DBS       Distance Backbone Synthesis (the paper's proposal). Uses a one-
+            parameter family of "distance backbones" and ranks every edge by the
+            largest parameter value (lambda) at which it still survives.
+
+Idea behind distance backbones: turn weights into distances (strong contact =
+short distance). An edge belongs to the "metric backbone" if no indirect path is
+shorter than the edge. Such edges are exactly the ones that matter for shortest
+paths. The Dombi family generalises how a path length is measured:
+  lambda = 1        -> ordinary sum of distances (metric backbone)
+  lambda -> infinity -> longest edge on the path (ultrametric backbone)
+  lambda -> 0       -> the whole graph
+Backbones are nested: a larger lambda gives a smaller backbone.
+
+
+--------------------------------------------------------------------------------
+3. THE BASE PAPER
+--------------------------------------------------------------------------------
+
+Title:    Distance backbones optimize spreading dynamics and centrality ranks in
+          the sparsification of complex networks
+Authors:  Pereira, Costa and Rocha (2026), arXiv:2603.14564v2
+File:     papers/2603.14564v2.pdf
+
+What the paper claims (as tested here):
+  (a) DBS and the metric/semi-metric methods preserve SPREADING dynamics better
+      than weight thresholding and the disparity filter.
+  (b) DBS also preserves the RANKING of nodes by eigenvector centrality.
+  (c) There is an optimal value of lambda (around 0.3) that balances fidelity
+      and size.
+
+The paper gives no code and no data link, so everything was rebuilt from the
+text. Where the paper is silent, we made and documented our own choices
+(Section 5).
+
+
+--------------------------------------------------------------------------------
+4. THE DATA
+--------------------------------------------------------------------------------
+
+Both datasets come from SocioPatterns: people wore wireless badges that record
+face-to-face contacts every 20 seconds.
+
+  hospital    75 nodes, 1,139 edges   (file: data/detailed_list_of_contacts_Hospital.dat)
+  workplace1  92 nodes,   755 edges   (file: data/tij_InVS.dat)
+
+How a contact list becomes a weighted network (paper Eq. 1):
+  r_ij   = number of 20-second intervals in which i and j were in contact
+  r_ii   = total contact intervals of person i
+  proximity  p_ij = r_ij / (r_ii + r_jj - r_ij)      (between 0 and 1)
+  distance   d_ij = 1 / p_ij - 1
+
+DATA CHECK against the paper's Table 1 (size of the metric backbone):
+
+  Network      Ours     Paper    Status
+  hospital     13.43%   13.43%   matches exactly -> verified replication
+  workplace1   13.25%   20.63%   differs         -> NOT a verified replication
+
+For workplace1 the node and edge counts match the paper but the metric backbone
+is smaller (179 edges against the paper's 228). We tried many explanations
+(other proximity formulas, duplicate rows, rounding, merging time steps, single
+days) and none worked. The cause is unknown. For that reason workplace1 is
+reported as a "second network" / robustness check, and ONLY hospital counts as
+a verified replication.
+
+
+--------------------------------------------------------------------------------
+5. WHAT WE IMPLEMENTED (THE REPLICATION)
+--------------------------------------------------------------------------------
+
+Everything is in the folder backbone/ and is driven by run.py.
+
+Step 1 - Build the graph (backbone/data.py)
+  Contact file -> proximity and distance for every edge.
+
+Step 2 - Score every edge (backbone/backbones.py, sparsify.py)
+  Semi-metric distortion, the metric and ultrametric backbones, and the DBS
+  lambda for every edge (found by bisection). Also the scores of W, DispFilt
+  and wEffRes. Every method is turned into an "importance" ranking: edges are
+  removed from least to most important. Ties (many SmD edges tie) are broken
+  with a seeded random order so results are reproducible.
+
+Step 3 - Progressive sparsification (backbone/sweep.py)
+  The adjusted size X runs from 0 (a spanning tree, the minimum that connects
+  everyone) to 1 (the full graph):
+      X = (edges kept - (n - 1)) / (total edges - (n - 1))
+  For each method and each X we keep the top-ranked edges.
+
+Step 4 - Measure fidelity (backbone/sweep.py, spread.py)
+  See Section 6.
+
+Step 5 - Summaries (backbone/summary.py)
+  Area under each fidelity curve, and the optimal DBS lambda (paper Eq. 17,
+  Table 3 weightings).
+
+Choices the paper does not specify (our decisions, all documented):
+  * Infection rate beta is calibrated so the full graph reaches half
+    infection in about 20 steps (hospital beta = 1.51, workplace1 beta = 1.23).
+  * Seeds: 15% of nodes, taken as top 5%, median 5% and bottom 5% by
+    eigenvector centrality of the original network.
+  * 100 SI runs per seed.
+  * wEffRes uses proximity as conductance.
+  * DispFilt uses the paper's formula with p = proximity.
+  * A node never infected gets the maximum time (1000 steps).
+
+
+--------------------------------------------------------------------------------
+6. HOW THE RESULTS ARE MEASURED
+--------------------------------------------------------------------------------
+
+Three fidelity measures, each between the ORIGINAL network and the backbone:
+
+  rho_C   Centrality fidelity (structural). Spearman rank correlation between
+          the eigenvector centrality of every node in the original and in the
+          backbone. 1 = same ranking of who is most important.
+
+  rho_t   Infection-order fidelity (functional). Run an SI epidemic (below) on
+          both networks. Spearman correlation of the average time at which each
+          node gets infected. 1 = people are infected in the same order.
+
+  xi^-1   Timescale fidelity (functional). Ratio of the half-infection time on
+          the original to that on the backbone (median over runs). 1 = the
+          epidemic takes just as long to reach half the nodes. Below 1 means
+          the backbone slows the epidemic down.
+
+SI model: one seed node starts infected. Each step, every infected node
+infects each susceptible neighbour with probability beta * proximity.
+
+AUC (area under the curve): each measure is plotted against X and the area from
+a lower limit to X = 1 is reported, so one number summarises a whole curve.
+The lower limit matters:
+  * The paper's rule: each method is only scored from the size at which it
+    stays connected (its own X-tilde).
+  * Our "common limit": every method is scored from the same X, the size of the
+    metric backbone. We consider this the fairer comparison, because the
+    paper's rule rewards methods that fall apart early (they are only scored
+    where they are already healthy). Both versions are reported.
+
+
+--------------------------------------------------------------------------------
+7. RESULTS OF THE REPLICATION
+--------------------------------------------------------------------------------
+
+AUC with the same lower limit for all methods (higher is better; 1 is perfect):
+
+              rho_C            rho_t            xi^-1
+  Method      hosp    work1    hosp    work1    hosp    work1
+  W           0.946   0.955    0.897   0.953    0.782   0.870
+  DispFilt    0.954   0.964    0.781   0.881    0.672   0.777
+  wEffRes     0.896   0.944    0.958   0.963    0.875   0.884
+  SmD         0.920   0.964    0.971   0.971    0.870   0.896
+  DBS         0.911   0.967    0.970   0.971    0.862   0.896
+
+What this says:
+
+  1. SPREADING: the paper's claim holds on both networks. DBS, SmD and wEffRes
+     are clearly ahead of W and DispFilt on rho_t and xi^-1, and DBS and SmD are
+     practically tied (the paper says this too).
+
+  2. CENTRALITY: the paper's claim holds only partly. On hospital, W and
+     DispFilt beat DBS (by 0.035 and 0.043). On workplace1 it is a near-tie.
+     So "DBS preserves centrality best" is not confirmed.
+
+  3. CONNECTIVITY: W and DispFilt lose connectivity much earlier than SmD and
+     DBS. For hospital the size at which they stay connected is 0.474 (W) and
+     0.800 (DispFilt) against 0.117 (SmD), 0.069 (wEffRes) and about 0
+     (DBS). This is the clue that leads to the extension.
+
+  4. OPTIMAL LAMBDA: hospital 0.346 (paper: about 0.3, agrees); workplace1
+     0.607 (higher than the paper).
+
+  5. The paper's own AUC rule makes W and DispFilt look best (hospital rho_C
+     AUC 0.99 and 1.00) simply because they are only scored where they are
+     still connected. This is why we also report the common-limit table.
+
+Other replication checks:
+  * Hospital's smallest and largest lambda match the paper's Table 2 exactly
+    (0.133 and 16.276), which supports the DBS implementation.
+  * The paper's log-normal fit of the lambda distribution is NOT reproduced
+    (our spread is 0.6-0.7 against 0.387; the fitting recipe is unstated).
+    These two checks were one-off and are not part of run.py.
+
+SENSITIVITY (does the ranking depend on our choices?)
+  * Changing the infection speed (half-time target 40 or 80) or using 300
+    instead of 100 SI runs does not change the ranking of methods apart from
+    ties of about 0.01 between DBS and SmD. AUCs move by at most 0.025.
+  * An important finding: if DispFilt uses per-node normalised weights (the
+    original Serrano formulation) instead of the paper's formula, it becomes
+    much better on spreading (hospital rho_t 0.781 -> 0.919). The paper does
+    not say which version it used, so "DispFilt is poor" is true for one
+    version only.
+
+
+--------------------------------------------------------------------------------
+8. THE EXTENSION: WHY WE WENT BEYOND THE PAPER
+--------------------------------------------------------------------------------
+
+A pure replication only checks whether the paper's numbers come out the same.
+We wanted to add understanding. After the replication, three observations
+raised a question:
+
+  * W and DispFilt spread badly.
+  * They also break the graph into several pieces early.
+  * The centrality measure rho_C does not seem to notice this.
+
+Diagnosis (backbone/diagnose.py, uses stored results, no new simulations):
+  * Structure and function disagree in BOTH directions. For example DispFilt
+    keeps rho_C >= 0.9 while rho_t < 0.8 at 40% of the sizes tested on
+    hospital. The reverse also occurs: DBS has good spreading (rho_t 0.95)
+    with poor rho_C (0.69) at hospital X = 0.2. So rho_C is a poor guide to
+    spreading fidelity.
+  * The number of connected components is strongly negatively related to
+    rho_t (about -0.8) but does not hurt rho_C. Eigenvector centrality lives on
+    the dense core of the graph, so it does not see lost connections.
+  * Keeping many "bridge" edges (between communities) barely separates the
+    methods at equal size.
+  * Below the metric-backbone size every method degrades; at the bare
+    spanning tree all are poor.
+
+THE QUESTION OF THE EXTENSION:
+  Why do distance backbones preserve spreading better than W and DispFilt, and
+  what exactly do they add?
+
+This is an explanation experiment, not a new method. We take W and DispFilt and
+give them one distance-backbone property at a time, then see how much of the
+gap to DBS closes. Three tests, using the same sizes, seeds, beta and reference
+runs as the replication so all numbers are comparable:
+
+  TEST 1 - Connectivity fix.
+    M+T : first add a spanning tree built along the method's own ranking, then
+          fill the budget with the method's top edges. Always connected.
+    M+R : same but with a RANDOM spanning tree (control). If M+R does as well
+          as M+T, then it is connectivity itself that matters, not which tree.
+
+  TEST 2 - Shortest-path preservation.
+    M+B : first add the whole metric backbone (it keeps every shortest path
+          and is connected), then the method's top edges.
+    M+X : the same number of RANDOM edges instead (control). If M+B beats M+X,
+          being metric (not just being many edges) matters.
+
+  TEST 3 - Bridge (between-community) edges, as a causal test.
+    Keep the metric backbone, then fill the budget preferring between-community
+    edges, within-community edges, or random edges. Communities come from
+    Louvain partitions of the original graph (3 partitions). If bridges were
+    the secret, preferring them should close the gap.
+
+Headline number: the share of the gap to DBS that a variant closes,
+      (AUC(variant) - AUC(start)) / (AUC(DBS) - AUC(start)).
+Verdict rules were fixed BEFORE the runs, with a noise band of 0.02:
+  "supported" if at least half of the gap is closed and the margin over the
+  control exceeds 0.02; "partial" if the gain exceeds the noise band; otherwise
+  "not supported".
+
+
+--------------------------------------------------------------------------------
+9. RESULTS OF THE EXTENSION
+--------------------------------------------------------------------------------
+
+Share of the xi^-1 gap to DBS closed (common limit = metric-backbone size):
+
+  Test                          hosp W    hosp Disp   work1 W    work1 Disp
+  1 Connectivity (M -> M+T)     36% part  41% part     5% no     40% part
+  2 Shortest paths (M+T -> M+B) 12% no    14% no      34% no     42% part
+  3 Bridges (M+B -> between)    negative  negative    undefined  negative
+                                (not supported in all four cases)
+
+Findings:
+
+  F1. CONNECTIVITY EXPLAINS MOST OF THE INFECTION-ORDER FAILURE.
+      On rho_t a plain spanning tree closes 77% (W) and 88% (DispFilt) of the
+      gap to DBS on hospital, and 86% for DispFilt on workplace1. It costs no
+      rho_C. A random tree does almost as well on rho_t, so for the order of
+      infection it is connectivity itself that matters.
+
+  F2. THE TIMESCALE IS ONLY PARTLY RECOVERED.
+      On xi^-1 connectivity closes about 40% at most. The guided tree beats the
+      random tree slightly (+0.03 to +0.06), so which tree matters a little,
+      but the margins are about the size of the noise.
+
+  F3. SHORTEST PATHS EXPLAIN PART OF THE REST.
+      12-14% on hospital, 34-42% on workplace1; never half. Forcing metric
+      edges beats forcing the same number of random edges (hospital W 0.817
+      against 0.776), so being metric does help, but on hospital the added
+      benefit on top of the spanning tree is small.
+
+  F4. BRIDGES DO NOT EXPLAIN IT.
+      No bridge-preferring fill beats the plain metric-backbone fill. The sign
+      of any bridge effect even flips between networks (hospital: within-
+      community fill is better; workplace1: between-community is better).
+      Between-community fills also cost rho_C on hospital.
+
+What remains unexplained: the rest of DBS's advantage comes from the way it
+chooses the edges it adds (its lambda ranking), which we did not isolate.
+
+
+--------------------------------------------------------------------------------
+10. CONCLUSION, LIMITS, AND WHAT IS NOT CLAIMED
+--------------------------------------------------------------------------------
+
+CONCLUSION (on the two networks tested)
+  The advantage of distance backbones over W and DispFilt splits into:
+    (i)  a CONNECTIVITY part, which accounts for most of the infection-order
+         advantage and is recovered by guaranteeing a spanning tree;
+    (ii) a TIMESCALE part, which shortest-path preservation explains only in
+         part and between-community edges do not explain.
+
+CLAIMS SUMMARY
+  C1  The paper's spreading result replicates; ranking is stable under beta,
+      number of runs and tie-breaking.
+  C2  The paper's centrality claim is mixed (fails on hospital, near-tie on
+      workplace1). DispFilt's weakness depends on its weight normalisation.
+  C3  rho_C does not predict spreading fidelity, in either direction, and
+      cannot see fragmentation.
+  C4  Fragmentation explains most of W and DispFilt's infection-order failure.
+  C5  The timescale is only partly recovered by connectivity.
+  C6  Preserving shortest paths explains part of the remaining timescale gap.
+  C7  Between-community edges do not explain it.
+
+PRACTICAL READING
+  Judge a backbone on connectivity AND on a dynamical measure, not on rho_C
+  alone. For weight thresholding and the disparity filter, a spanning-tree
+  guarantee removes most of the infection-order penalty.
+
+WHAT IS NOT CLAIMED
+  * That the spanning-tree repair beats or replaces DBS or SmD (it does not:
+    hospital xi^-1 is 0.811 against 0.870 for SmD).
+  * That it is cheaper (not timed).
+  * That results hold beyond contact networks.
+  * Any statistical significance level.
+
+LIMITS
+  * Only two networks, and only hospital is a verified replication.
+  * workplace1's data differ from the paper's for an unknown reason.
+  * Only SI spreading and eigenvector centrality are tested (as in the paper).
+  * The 50% / 0.02 verdict thresholds are our own choices; several outcomes sit
+    just under the half line (34-42%).
+  * No error bars on the AUCs; each lambda value has one stochastic run.
+  * The lambda-distribution check and the school-network check were one-off
+    and are not reproducible from run.py.
+
+
+--------------------------------------------------------------------------------
+11. GLOSSARY
+--------------------------------------------------------------------------------
+
+Adjusted size X       Fraction of the "extra" edges kept, from 0 (spanning tree)
+                      to 1 (full graph).
+AUC                   Area under a fidelity-versus-X curve, normalised to [0,1].
+Backbone              A small subset of edges that keeps the network's key
+                      properties.
+Bridge                An edge between two communities.
+Connected             Every node can reach every other node.
+Dombi family          The lambda-parameterised way of measuring path length.
+Eigenvector           A node is important if it is linked to important nodes.
+centrality
+Fidelity              How faithfully the backbone reproduces the original.
+Lambda (edge)         The largest lambda at which an edge is still in the
+                      distance backbone; the DBS importance score.
+Louvain               A standard algorithm that finds communities.
+Metric backbone       Edges that lie on a shortest path (no shorter detour).
+Proximity / distance  Edge strength in (0,1] and its inverse-based distance.
+rho_C, rho_t, xi^-1   The three fidelity measures (Section 6).
+SI model              Susceptible-Infected epidemic; infected nodes stay
+                      infected.
+Spanning tree         The minimal set of n-1 edges that connects all n nodes.
+Spearman correlation  Correlation of ranks (1 = identical ordering).
+Ultrametric backbone  Union of minimum spanning trees (the lambda -> infinity
+                      limit).
+X-tilde               Lower integration limit of the AUC (paper's own rule).
+
+
+--------------------------------------------------------------------------------
+12. HOW TO RUN THE CODE AND WHERE THINGS ARE
+--------------------------------------------------------------------------------
+
+Install and test:
+    python -m pip install -r requirements.txt
+    python -m pytest tests -q          (57 tests)
+
+Run:
+    python run.py                      full pipeline (26 min last run), writes results/ and ui/data.js
+    python run.py --quick              10 SI runs per seed, writes results_quick/
+    python run.py --networks hospital  one network only
+    python run.py --force              recompute, ignoring cached results
+
+Dashboard: open ui/index.html in a browser (data comes from ui/data.js, which
+run.py generates). It shows the networks, curves, AUC, a live epidemic, the
+lambda study, sensitivity, diagnosis, the extension and the conclusion.
+Number keys 1-10 switch tabs. See the separate Dashboard Guide for each tab
+and a demo script.
+
+Folder map:
+    run.py                single entry point
+    backbone/data.py       contact files -> graphs, Table 1 values
+    backbone/backbones.py  distortion, metric/ultrametric backbones, DBS lambda
+    backbone/sparsify.py   the five methods and the connected variants
+    backbone/sweep.py      rho_C and connectivity limits
+    backbone/spread.py     SI model, rho_t, xi^-1, beta calibration
+    backbone/summary.py    AUC and optimal lambda
+    backbone/sensitivity.py sensitivity settings
+    backbone/diagnose.py   diagnosis tables
+    backbone/connected.py  the extension (three tests and verdicts)
+    backbone/plots.py      figures
+    backbone/export.py     results -> dashboard data
+    tests/                 pytest suite
+    data/                  the two raw contact files
+    docs/RESULTS.md        full technical results write-up
+    papers/                base paper and Correia et al. 2023
+    results/               generated outputs (key tables and figures committed)
+
+
+--------------------------------------------------------------------------------
+13. HONEST STATUS OF THE PROJECT
+--------------------------------------------------------------------------------
+
+Done and verified:
+  * Full pipeline runs; all 57 tests pass.
+  * Hospital data reproduces the paper's Table 1 exactly.
+  * The paper's spreading claim is reproduced on both networks.
+  * Sensitivity, diagnosis and the three-test extension are complete.
+  * A full re-run on 2026-10-21 (26 minutes) reproduced the same AUC tables
+    and extension verdicts and regenerated the dashboard data for both
+    networks.
+
+Known gaps and suggested improvements:
+  * A third network (the conference dataset, ht09) was planned but is not in
+    the current code; adding it would strengthen the study.
+  * Error bars on AUCs would make borderline verdicts more convincing.
+  * The one-off checks (lambda fit, school networks) should be made
+    reproducible or dropped from the claims.
+  * Run time is now stated as about 30 minutes in the README, run.py and
+    docs/RESULTS.md (the runs took 26 to 36 minutes, depending on load).
+  * Work should be committed to git before submission.
+
+================================================================================
+END
+================================================================================

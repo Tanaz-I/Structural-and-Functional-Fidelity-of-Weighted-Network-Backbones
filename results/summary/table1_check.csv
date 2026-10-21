@@ -1,0 +1,3 @@
+network,nodes,paper_nodes,edges,paper_edges,metric_X_percent,paper_metric_X_percent,X_difference,status,balanced_lambda_opt
+hospital,75,75,1139,1139,13.427,13.43,-0.0,replication: matches Table 1,0.346
+workplace1,92,92,755,755,13.253,20.63,-7.38,second network: metric size differs from Table 1,0.607

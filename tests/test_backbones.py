@@ -4,7 +4,9 @@ import pytest
 
 from backbone.backbones import (adjusted_size, backbone_at_lambda, edge_table, metric_edges,
                                 ultrametric_edges)
-from backbone.data import RAW_HOSPITAL, load_graph
+from backbone.data import NETWORKS, load_graph
+
+RAW_HOSPITAL = NETWORKS["hospital"][0]
 
 
 def toy():
@@ -38,7 +40,7 @@ def test_adjusted_size():
 
 @pytest.mark.skipif(not RAW_HOSPITAL.exists(), reason="raw hospital data not present")
 def test_hospital():
-    G = load_graph()
+    G = load_graph(RAW_HOSPITAL)
     t = edge_table(G)
     n, m = G.number_of_nodes(), G.number_of_edges()
     assert (t["distortion"] >= 1 - 1e-9).all()

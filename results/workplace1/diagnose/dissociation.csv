@@ -1,0 +1,6 @@
+method,n_budgets,structure_ok_function_bad,function_ok_structure_bad,spearman_rhoC_rhot
+W,20,0.0,0.0,0.9263157894736842
+DispFilt,20,0.25,0.0,0.9849624060150375
+wEffRes,20,0.0,0.0,0.9669172932330825
+SmD,20,0.0,0.0,0.9699248120300751
+DBS,20,0.0,0.0,0.9488721804511278

@@ -3,7 +3,7 @@
 Model: one seed node starts infected; every step each infected node infects each susceptible neighbour with
 probability beta * p_ij (synchronous update). Infection times are recorded; seed = time 0.
 
-Conventions where the paper is silent (all documented in docs/PROGRESS.md):
+Conventions where the paper is silent (all documented in docs/RESULTS.md):
   * beta is calibrated so that the median half-infection time on the FULL graph is `target_t_half` steps.
   * a node never infected (other component, or step cap) gets time T_MAX; a run stops once the seed's whole
     connected component is infected, or at T_MAX.
@@ -23,11 +23,10 @@ from scipy.stats import spearmanr
 
 from .backbones import adjusted_size
 from .sparsify import METHODS, edges_to_keep, ranking
-from .sweep import Network, eigenvector_centrality
+from .sweep import eigenvector_centrality
 
 T_MAX = 1000
 RUNS = 100
-SI_CSV = "results/hospital/sweep_si.csv"
 
 
 def choose_seeds(centrality, frac=0.15):
@@ -124,14 +123,15 @@ def achieved_half_time(ref, seeds):
     return float(np.mean([np.median(half_time(ref[int(s)])) for s in seeds]))
 
 
-def si_sweep(net, methods=METHODS, ks=None, target_t_half=20.0, runs=RUNS, seed=0, extra_ks=(), setup=None):
+def si_sweep(net, methods=METHODS, ks=None, target_t_half=20.0, runs=RUNS, seed=0, extra_ks=(), setup=None, orders=None):
     """Mean/std over seeds of rho_t and xi^-1_0.5 for each method and sparsification level.
-    `setup` = (seeds, beta, ref) from si_setup, to share one calibration between sweeps."""
+    `setup` = (seeds, beta, ref) from si_setup, to share one calibration between sweeps.
+    `orders` optionally maps a method name to a ready-made edge order (most important first)."""
     seeds, beta, ref = setup if setup is not None else si_setup(net, target_t_half, runs, seed)
     ks = sorted(set(ks if ks is not None else x_grid(net)) | set(extra_ks))
     rows = []
     for mi, method in enumerate(methods):
-        order = ranking(net.table, method, seed)
+        order = orders[method] if orders and method in orders else ranking(net.table, method, seed)
         for k in ks:
             rho, xi = spreading_fidelity(net.adjacency(order[:k]), seeds, beta, ref, runs,
                                          rng_seed=1000 * (mi + 1) + k)
@@ -139,18 +139,3 @@ def si_sweep(net, methods=METHODS, ks=None, target_t_half=20.0, runs=RUNS, seed=
     df = pd.DataFrame(rows, columns=["method", "n_edges", "X", "rho_t", "rho_t_std", "xi", "xi_std"])
     df.attrs["beta"], df.attrs["seeds"] = beta, seeds
     return df
-
-
-if __name__ == "__main__":
-    from pathlib import Path
-
-    from .backbones import edge_table
-    from .data import load_graph
-
-    net = Network(edge_table(load_graph()))
-    df = si_sweep(net, extra_ks=[217])  # 217 = metric backbone size
-    Path(SI_CSV).parent.mkdir(parents=True, exist_ok=True)
-    df.to_csv(SI_CSV, index=False)
-    print("beta =", df.attrs["beta"], "seeds =", [net.nodes[s] for s in df.attrs["seeds"]])
-    print(df.pivot(index="X", columns="method", values="rho_t").round(3))
-    print(df.pivot(index="X", columns="method", values="xi").round(3))

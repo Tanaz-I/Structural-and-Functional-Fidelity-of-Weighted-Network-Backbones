@@ -60,7 +60,7 @@ th:first-child,td:first-child{text-align:left}
 <body>
 <header>
   <h1>Backbone Fidelity Lab</h1>
-  <div class="sub">Keep fewer edges, keep the behaviour? Explore five sparsification methods on temporal contact networks (replication of Pereira, Costa &amp; Rocha 2026).</div>
+  <div class="sub">Keep fewer edges, keep the behaviour? Explore five sparsification methods on two contact networks (replication of Pereira, Costa &amp; Rocha 2026), then see why weight thresholding and the disparity filter lose spreading fidelity (sensitivity, diagnosis, extension, conclusion).</div>
   <label>Network <select id="net"></select></label>
   <button id="theme" title="Toggle light / dark">◐</button>
 </header>
@@ -80,7 +80,7 @@ th:first-child,td:first-child{text-align:left}
     <div>Methods: <span id="chips"></span></div>
   </div>
   <div class="card"><h2>This network</h2><div class="stats" id="intro-stats"></div>
-    <div class="note">Use the tabs: <b>Network lens</b> to see the backbones, <b>Curves</b> and <b>AUC</b> for the scores, <b>Epidemic</b> to watch spreading, <b>λ study</b> to pick the DBS parameter.</div></div>
+    <div class="note">Use the tabs: <b>Network lens</b> to see the backbones, <b>Curves</b> and <b>AUC</b> for the scores, <b>Epidemic</b> to watch spreading, <b>λ study</b> to pick the DBS parameter. Then <b>Sensitivity</b>, <b>Diagnosis</b>, <b>Extension</b> and <b>Conclusion</b> for the explanation of why the methods differ.</div></div>
   <div class="card"><h2>Headline results (this network)</h2><div id="headline"></div></div>
 </section>
 
@@ -170,6 +170,88 @@ th:first-child,td:first-child{text-align:left}
   </div>
 </section>
 
+<section class="tab" id="t-sens">
+  <div class="card">
+    <div class="row">
+      <label>Setting <select id="sens-set"></select></label>
+      <label>Integration limit
+        <select id="sens-lim"><option value="metric">same limit for all (metric backbone size)</option><option value="own">each method's own X̃</option></select></label>
+    </div>
+    <div class="note">Does the ranking of the methods depend on choices the paper leaves open? The β target (timescale of the epidemic), the number of SI runs, and how the disparity filter normalises weights. The last setting replaces DispFilt by a per-node normalised version (purple).</div>
+    <canvas id="sens-c" height="340"></canvas>
+    <div id="sens-table" style="margin-top:10px"></div>
+  </div>
+  <div class="card"><h2>Does the ranking change?</h2><div class="note">Methods ordered best to worst for each setting and measure. A stable order means the conclusion does not hang on these choices; differences of about 0.01 to 0.02 are noise.</div><div id="sens-rank"></div></div>
+</section>
+
+<section class="tab" id="t-diag">
+  <div class="card">
+    <div class="row">
+      <label>Measure <select id="dg-m"></select></label>
+      <label><input type="checkbox" id="dg-zoom"> zoom to the sparse regime (X ≤ 0.3)</label>
+      <div class="legend" id="dg-legend"></div>
+    </div>
+    <div class="note">Where do the methods fail? The dashed line marks the metric-backbone size, the lowest size the paper's AUC reaches; below it every method degrades. Bridge retention is the share of between-community edges (Louvain, 10 seeds) that a backbone keeps.</div>
+    <canvas id="dg-c" height="340"></canvas>
+  </div>
+  <div class="card"><h2>Structure and function disagree</h2>
+    <div class="note">Share of budgets (X &gt; 0.05) where centrality-rank fidelity is high but spreading fidelity is low (ρ<sub>C</sub> ≥ 0.9 and ρ<sub>t</sub> &lt; 0.8), and the reverse. ρ<sub>C</sub> does not predict spreading fidelity.</div>
+    <div id="dg-table"></div></div>
+  <div class="card"><h2>Fragmentation tracks the spreading failure</h2>
+    <div class="note">Connected components and infection-order fidelity at the same size. <span class="bad">Red</span> = the backbone is split into several components, which ρ<sub>C</sub> cannot see.</div>
+    <div id="dg-frag"></div></div>
+</section>
+
+<section class="tab" id="t-ext">
+  <div class="card" id="ex-live">
+    <h2>Repair it yourself</h2>
+    <div class="row">
+      <label>Base method <select id="ex-b2"><option value="W">W</option><option value="DispFilt">DispFilt</option></select></label>
+      <label>X <input type="range" id="ex-x" min="0" max="1" step="0.005"> <b id="ex-xv"></b></label>
+      <button id="ex-metric">jump to metric backbone</button>
+      <label><input type="checkbox" id="ex-b3" checked> also show “+ metric backbone first”</label>
+    </div>
+    <div class="note">Every panel keeps the <b>same number of edges</b>. Plain W or DispFilt splits the network into several components (<span class="bad">red nodes</span>); a spanning tree built from the method's own ranking reconnects it, and the numbers show how much of the spreading fidelity comes back. Drag X, or click a curve below to set it.</div>
+    <div class="small-mult" id="ex-panels"></div>
+    <div class="grid g2" style="margin-top:10px"><div><canvas id="ex-crt" height="260"></canvas></div><div><canvas id="ex-cxi" height="260"></canvas></div></div>
+    <div class="note">Dashed = the plain method, solid = DBS. ρ<sub>t</sub> (left) is recovered by connectivity alone; ξ⁻¹ (right, the timescale) only in part.</div>
+  </div>
+  <div class="card">
+    <div class="row">
+      <label>Base method <select id="ex-b"><option value="W">W</option><option value="DispFilt">DispFilt</option></select></label>
+      <label>Lower limit <select id="ex-l"><option value="metric">metric-backbone size</option><option value="zero">spanning tree (X = 0)</option></select></label>
+    </div>
+    <div class="note">Why do W and DispFilt lose spreading fidelity, and what does a distance backbone add? Each bar is the area under the curve for one variant of the base method. <b>+ spanning tree</b> guarantees connectivity; <b>+ metric backbone first</b> also preserves every shortest path; the random variants are controls; the three fills keep the metric backbone and fill the rest with between-community, within-community or random edges. The darkest bars are DBS, the reference.</div>
+    <canvas id="ex-c" height="380"></canvas>
+    <div class="legend" id="ex-leg" style="margin-top:4px"></div>
+  </div>
+  <div class="card"><h2>Verdicts</h2>
+    <div class="note">Share of the gap to DBS that each variant closes on ξ⁻¹ (timescale). Connectivity fix: plain → spanning tree (control: random tree). Shortest paths: spanning tree → metric backbone first (control: random edges). Bridges: metric backbone first → between-community fill (control: the better of within and random). “supported” needs at least half of the gap closed and a margin over the control (0.02).</div>
+    <div id="ex-table"></div></div>
+</section>
+
+<section class="tab" id="t-concl">
+  <div class="card hero">
+    <h2>Conclusion</h2>
+    <div>On the contact networks tested, the advantage of distance backbones (DBS, SmD) over weight thresholding (W) and the disparity filter (DispFilt) splits into two parts: a <b>connectivity part</b>, which accounts for most of the infection-order advantage and is recovered by guaranteeing a spanning tree, and a <b>timescale part</b>, which preserving every shortest path explains only in part and between-community (“bridge”) edges do not explain. The rest is left to the λ-based choice of the edges DBS adds above the metric backbone, which was not isolated.</div>
+    <ol>
+      <li><b>Replication.</b> The paper's spreading result holds (DBS, SmD, wEffRes beat W and DispFilt on ρ<sub>t</sub> and ξ⁻¹); its centrality claim is mixed across networks.</li>
+      <li><b>Centrality-rank fidelity does not predict spreading fidelity.</b> ρ<sub>C</sub> and spreading fidelity disagree in both directions, and ρ<sub>C</sub> cannot see fragmentation (connectivity, by contrast, does predict infection order).</li>
+      <li><b>Fragmentation explains the infection-order failure</b> of W and DispFilt: a spanning tree restores most of it at no cost to ρ<sub>C</sub>.</li>
+      <li><b>The timescale gap is only partly explained:</b> shortest-path preservation accounts for part of it, bridge edges for none consistently.</li>
+    </ol>
+  </div>
+  <div class="card"><h2>Evidence for this network</h2><div class="note">Computed live from the stored results (AUC from the metric-backbone size). “n/a” = the gap to DBS is smaller than the noise band (0.02).</div><div id="cc-evidence"></div></div>
+  <div class="card"><h2>What is not claimed</h2>
+    <ul>
+      <li>That the spanning-tree repair beats or replaces DBS or SmD, or that it is cheaper (not timed).</li>
+      <li>That the results hold beyond contact networks, or any significance level: only two networks are used, one SI model and one β.</li>
+      <li>workplace1 has the paper's nodes and edges but a smaller metric backbone than its Table 1 (cause not found), so only hospital is a verified replication.</li>
+    </ul>
+    <div class="note">Numbers, evidence and limits: docs/RESULTS.md. Every table on these tabs comes from <code>python run.py</code>.</div>
+  </div>
+</section>
+
 </main>
 <div id="tip"></div>
 <script src="data.js"></script>
@@ -177,6 +259,9 @@ th:first-child,td:first-child{text-align:left}
 "use strict";
 const D = window.DATA, M = D.methods;
 const COL = {DBS:"#2a78d6",SmD:"#eb6834",wEffRes:"#1baf7a",DispFilt:"#eda100",W:"#e87ba4"};
+const MV = ["W+T","DispFilt+T","W+B","DispFilt+B"];       // connected variants (extension)
+Object.assign(COL, {"W+T":"#b5427a","DispFilt+T":"#b87600","W+B":"#8a4fd6","DispFilt+B":"#5f8f00"});
+const VLAB = {"W+T":"W + spanning tree","DispFilt+T":"DispFilt + spanning tree","W+B":"W + metric backbone first","DispFilt+B":"DispFilt + metric backbone first"};
 const DASH = {DBS:[],SmD:[7,4],wEffRes:[9,3,2,3],DispFilt:[2,3],W:[12,3]};
 const $ = id => document.getElementById(id);
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -281,7 +366,7 @@ function hideTip(){ tip.style.display="none"; }
 const interp = (xs,ys) => v => { if(v<=xs[0]) return ys[0]; for(let i=1;i<xs.length;i++) if(v<=xs[i]) return ys[i-1]+(v-xs[i-1])/(xs[i]-xs[i-1])*(ys[i]-ys[i-1]); return ys.at(-1); };
 
 /* ---------- shell ---------- */
-const TABS = [["intro","Overview"],["lens","Network lens"],["curves","Curves"],["auc","AUC"],["epi","Epidemic"],["lam","λ study"]];
+const TABS = [["intro","Overview"],["lens","Network lens"],["curves","Curves"],["auc","AUC"],["epi","Epidemic"],["lam","λ study"],["sens","Sensitivity"],["diag","Diagnosis"],["ext","Extension"],["concl","Conclusion"]];
 TABS.forEach(([id,t])=>{ const b=document.createElement("button"); b.textContent=t; b.dataset.id=id; b.onclick=()=>go(id); $("nav").appendChild(b); });
 Object.keys(D.networks).forEach(k=>$("net").add(new Option(k,k)));
 $("net").value=S.net;
@@ -291,9 +376,11 @@ function legendInto(el){ el.innerHTML=""; M.forEach(m=>{ const l=document.create
     cb.onchange=()=>{ cb.checked?S.hidden.delete(m):S.hidden.add(m); render(); };
     l.append(cb); const sw=document.createElement("span"); sw.className="sw"; sw.style.borderColor=COL[m]; sw.style.borderTopStyle=m==="DBS"?"solid":"dashed"; l.append(sw,m); el.append(l); }); }
 M.forEach(m=>{ ["lens-m","epi-m"].forEach(id=>$(id).add(new Option(m,m))); const c=document.createElement("span"); c.className="chip"; c.style.borderColor=COL[m]; c.style.color=COL[m]; c.style.background=COL[m]+"1f"; c.textContent=m; $("chips").append(c," "); });
+const HAS_V = MV.every(v=>Object.values(D.networks).every(n=>n.rank&&n.rank[v]&&n.si[v]));
+if(HAS_V) MV.forEach(v=>["lens-m","epi-m"].forEach(id=>$(id).add(new Option(VLAB[v],v))));
 $("lens-m").value=$("epi-m").value="DBS";
-function setX(x){ S.x = clamp(x,0,1); ["lens-x","cur-x","epi-x"].forEach(id=>$(id).value=S.x); ["lens-xv","cur-xv","epi-xv"].forEach(id=>$(id).textContent=S.x.toFixed(3)+"  ("+N.kOf(S.x)+" edges)"); }
-["lens-x","cur-x","epi-x"].forEach(id=>$(id).oninput=e=>{ setX(+e.target.value); if(id==="epi-x") epiReset(); render(); });
+function setX(x){ S.x = clamp(x,0,1); ["lens-x","cur-x","epi-x","ex-x"].forEach(id=>$(id).value=S.x); ["lens-xv","cur-xv","epi-xv","ex-xv"].forEach(id=>$(id).textContent=S.x.toFixed(3)+"  ("+N.kOf(S.x)+" edges)"); }
+["lens-x","cur-x","epi-x","ex-x"].forEach(id=>$(id).oninput=e=>{ setX(+e.target.value); if(id==="epi-x") epiReset(); render(); });
 $("lens-m").onchange=render; $("lens-removed").onchange=render; $("lens-all").onchange=render;
 let sweepT=null;
 $("lens-sweep").onclick=()=>{ if(sweepT){clearInterval(sweepT);sweepT=null;$("lens-sweep").textContent="▶ sweep X (1 → 0)";return;}
@@ -305,7 +392,7 @@ $("theme").onclick=()=>{ const r=document.documentElement; const dark = r.datase
 addEventListener("resize", ()=>render());
 
 function load(){ N = prep(D.networks[S.net]); S.seed = N.raw.centrality.indexOf(N.cmax); setX(S.x); lamInit(); epiReset(); render(); }
-function render(){ ({intro:rIntro,lens:rLens,curves:rCurves,auc:rAuc,epi:rEpi,lam:rLam})[S.tab](); }
+function render(){ ({intro:rIntro,lens:rLens,curves:rCurves,auc:rAuc,epi:rEpi,lam:rLam,sens:rSens,diag:rDiag,ext:rExt,concl:rConcl})[S.tab](); }
 
 /* ---------- Overview ---------- */
 function rIntro(){
@@ -477,8 +564,94 @@ function rLam(){
 function rLamTab(){ rLam(); }
 
 
+/* ---------- Sensitivity ---------- */
+const SETS = {base:"base (β target 20, 100 SI runs)", beta_40:"β target 40", beta_80:"β target 80", runs_300:"300 SI runs per seed", dispfilt_norm:"DispFilt with per-node normalised weights"};
+const COL2 = {DispFiltNorm:"#8b6bd9"};
+Object.entries(SETS).forEach(([k,v])=>$("sens-set").add(new Option(v,k)));
+function sensRows(set,lim){ const t=N.raw.sens, r=[]; t.setting.forEach((s,i)=>{ if(s===set&&t.limit[i]===lim) r.push({m:t.method[i],C:t.AUC_rho_C[i],t:t.AUC_rho_t[i],xi:t.AUC_xi[i]}); }); return r; }
+function rSens(){
+  const set=$("sens-set").value, lim=$("sens-lim").value, colr=m=>COL[m]||COL2[m];
+  const rows = set==="dispfilt_norm" ? sensRows("base",lim).concat(sensRows(set,lim)) : sensRows(set,lim);
+  barChart($("sens-c"),["ρ_C","ρ_t","ξ⁻¹"],rows.map(r=>({name:r.m,color:colr(r.m),vals:[r.C,r.t,r.xi]})),{h:340,y0:.5});
+  $("sens-table").innerHTML=`<table><tr><th>method</th><th>ρ_C</th><th>ρ_t</th><th>ξ⁻¹</th></tr>`+rows.map(r=>`<tr><td style="color:${colr(r.m)}"><b>${r.m}</b></td><td>${fmt(r.C)}</td><td>${fmt(r.t)}</td><td>${fmt(r.xi)}</td></tr>`).join("")+"</table>";
+  const order=(s,k)=>sensRows(s,lim).sort((a,b)=>b[k]-a[k]).map(x=>x.m).join(" > ");
+  $("sens-rank").innerHTML=`<table><tr><th>setting</th><th>ρ_C</th><th>ρ_t</th><th>ξ⁻¹</th></tr>`+Object.keys(SETS).filter(s=>s!=="dispfilt_norm").map(s=>`<tr><td>${SETS[s]}</td>${["C","t","xi"].map(k=>`<td style="text-align:left">${order(s,k)}</td>`).join("")}</tr>`).join("")+"</table>";
+}
+$("sens-set").onchange=$("sens-lim").onchange=rSens;
+
+/* ---------- Diagnosis ---------- */
+const DG = {rho_C:"ρ_C (centrality rank)", rho_t:"ρ_t (infection-order rank)", xi:"ξ⁻¹ (spreading speed)", bridge_retention:"bridge retention"};
+Object.entries(DG).forEach(([k,v])=>$("dg-m").add(new Option(v,k)));
+function retSeries(m){ const t=N.raw.diag.retention, idx=[]; t.method.forEach((x,i)=>{ if(x===m) idx.push(i); }); idx.sort((a,b)=>t.X[a]-t.X[b]); return {X:idx.map(i=>t.X[i]), get:k=>idx.map(i=>t[k][i])}; }
+function rDiag(){
+  legendInto($("dg-legend")); const key=$("dg-m").value, zoom=$("dg-zoom").checked;
+  const xmax=zoom?0.3:1;
+  const series=M.map(m=>{ const s=retSeries(m), all=s.get(key), keep=s.X.map((x,i)=>i).filter(i=>s.X[i]<=xmax+0.01), xs=keep.map(i=>s.X[i]), y=keep.map(i=>all[i]);
+    return {name:m,color:COL[m],dash:DASH[m],x:xs,y,at:interp(xs,y)}; });
+  lineChart($("dg-c"),{series,xlim:[0,xmax],ylim:[0,1],xticks:zoom?[0,.1,.2,.3]:undefined,xlabel:"adjusted size X",ylabel:DG[key],h:340,hoverX:v=>"X = "+v.toFixed(3),cursor:N.metricX});
+  const d=N.raw.diag.dissociation, pct=v=>v==null?"–":Math.round(100*v)+"%";
+  $("dg-table").innerHTML=`<table><tr><th>method</th><th>ρ_C high, ρ_t low</th><th>ρ_t high, ρ_C low</th><th>Spearman(ρ_C, ρ_t) over budgets</th></tr>`+d.method.map((m,i)=>`<tr><td style="color:${COL[m]}"><b>${m}</b></td><td${d.structure_ok_function_bad[i]>0?' class="bad"':''}>${pct(d.structure_ok_function_bad[i])}</td><td>${pct(d.function_ok_structure_bad[i])}</td><td>${fmt(d.spearman_rhoC_rhot[i],2)}</td></tr>`).join("")+"</table>";
+  const t=N.raw.diag.retention, targets=[0.1,0.2,0.3,0.5];
+  const at=(m,x)=>{ let b=-1,bd=9; t.method.forEach((mm,i)=>{ if(mm===m&&Math.abs(t.X[i]-x)<bd){bd=Math.abs(t.X[i]-x);b=i;} }); return b; };
+  $("dg-frag").innerHTML=`<table><tr><th>method</th>${targets.map(x=>`<th>X ≈ ${x}</th>`).join("")}</tr>`+M.map(m=>`<tr><td style="color:${COL[m]}"><b>${m}</b></td>${targets.map(x=>{ const i=at(m,x); return `<td${t.components[i]>1?' class="bad"':''}>${t.components[i]} comp · ρ<sub>t</sub> ${fmt(t.rho_t[i],2)}</td>`; }).join("")}</tr>`).join("")+"</table>";
+}
+$("dg-m").onchange=$("dg-zoom").onchange=rDiag;
+
+/* ---------- Extension ---------- */
+const VC = {"supported":"#1baf7a","partial":"#eda100","not supported":"#c4361f"};
+const EXV = b => [[b,"plain "+b,COL[b]],[b+"+T","+ spanning tree","#2a78d6"],[b+"+R","+ random spanning tree","#9ab8dd"],[b+"+B","+ metric backbone first","#1baf7a"],[b+"+X","+ same number of random edges","#a9d9c3"],
+  [b+"|between","metric backbone + between-community fill","#eb6834"],[b+"|within","metric backbone + within-community fill","#eda100"],[b+"|random","metric backbone + random fill","#8b6bd9"],["DBS","DBS (reference)",css("--ink")]];
+function extRow(m,lim){ const t=N.raw.ext.auc; for(let i=0;i<t.method.length;i++) if(t.method[i]===m&&t.limit[i]===lim) return [t.AUC_rho_C[i],t.AUC_rho_t[i],t.AUC_xi[i]]; return null; }
+function rExt(){
+  $("ex-b2").value=$("ex-b").value; rExtLive();
+  const b=$("ex-b").value, lim=$("ex-l").value, vs=EXV(b).filter(v=>extRow(v[0],lim));
+  barChart($("ex-c"),["ρ_C","ρ_t","ξ⁻¹"],vs.map(v=>({name:v[1],color:v[2],vals:extRow(v[0],lim)})),{h:380,y0:.5});
+  $("ex-leg").innerHTML=vs.map(v=>`<span><b style="color:${v[2]}">■</b> ${v[1]}</span>`).join("");
+  const v=N.raw.ext.verdicts, T={fix:"Connectivity fix",paths:"Shortest paths",bridges:"Bridges (causal)"}, rows=[];
+  v.test.forEach((tn,i)=>{ if(v.base[i]===b&&v.limit[i]===lim) rows.push(`<tr><td style="text-align:left">${T[tn]}</td><td>${fmt(v.xi_start[i])}</td><td>${fmt(v.xi_variant[i])}</td><td>${fmt(v.xi_control[i])}</td><td>${fmt(v.xi_DBS[i])}</td><td>${v.gap_closed[i]==null?"–":Math.round(100*v.gap_closed[i])+"%"}</td><td><span class="chip" style="border-color:${VC[v.verdict[i]]};color:${VC[v.verdict[i]]}">${v.verdict[i]}</span></td></tr>`); });
+  $("ex-table").innerHTML=`<table><tr><th>test</th><th>ξ⁻¹ start</th><th>variant</th><th>control</th><th>DBS</th><th>gap closed</th><th>verdict</th></tr>${rows.join("")}</table>`;
+}
+$("ex-b").onchange=$("ex-l").onchange=rExt;
+
+/* ---------- Extension: live repair and conclusion evidence ---------- */
+function rExtLive(){
+  const b=$("ex-b2").value, three=$("ex-b3").checked, x=S.x;
+  if(!N.raw.rank[b+"+T"]||!N.raw.rank[b+"+B"]||!N.raw.si[b+"+B"]){
+    $("ex-panels").innerHTML='<div class="note" style="grid-column:1/-1">This data file was exported before the connected variants existed. Run <code>python run.py</code> (it regenerates <code>ui/data.js</code>) and reload.</div>'; return; }
+  const vs=[[b,"plain "+b],[b+"+T","+ spanning tree"]].concat(three?[[b+"+B","+ metric backbone first"]]:[]);
+  $("ex-panels").innerHTML=vs.map((v,i)=>`<div class="cell"><div><b style="color:${COL[v[0]]}">${v[1]}</b><span id="exs-${i}"></span></div><canvas id="exg-${i}" height="300"></canvas></div>`).join("");
+  vs.forEach((v,i)=>{ const cp=drawGraph($("exg-"+i),N.keep(v[0],x),{color:COL[v[0]],showRemoved:true,h:300,small:true}), a=N.rhoC(v[0],x), s=N.si(v[0],x);
+    $("exs-"+i).innerHTML=`<span${cp.count>1?' class="bad"':''}>${cp.count} comp</span> · ρ<sub>t</sub> ${fmt(s.rho_t,2)} · ξ⁻¹ ${fmt(s.xi,2)} · ρ<sub>C</sub> ${fmt(a.rho,2)}`; });
+  const names=[b,b+"+T"].concat(three?[b+"+B"]:[]).concat(["DBS"]);
+  const srs=key=>names.map(m=>{ const src=N.raw.si[m]; return {name:m,color:COL[m],dash:m===b?[8,4]:[],x:src.X,y:src[key],at:interp(src.X,src[key])}; });
+  [["ex-crt","rho_t","ρ_t  (infection order)"],["ex-cxi","xi","ξ⁻¹  (timescale)"]].forEach(([id,key,lab])=>
+    lineChart($(id),{series:srs(key),xlim:[0,1],ylim:[0,1],xlabel:"adjusted size X",ylabel:lab,cursor:x,h:260,hoverX:v=>"X = "+v.toFixed(3),onClick:v=>{setX(v);render();}}));
+}
+$("ex-b2").onchange=()=>{ $("ex-b").value=$("ex-b2").value; render(); };
+$("ex-b3").onchange=render;
+$("ex-metric").onclick=()=>{ setX(N.metricX); render(); };
+
+function rConcl(){
+  const A=(m,k)=>{ const r=extRow(m,"metric"); return r?r[k]:null; };
+  const closed=(start,variant,k)=>{ const gap=A("DBS",k)-A(start,k); return Math.abs(gap)>0.02 ? Math.round(100*(A(variant,k)-A(start,k))/gap)+"%" : "n/a (gap below noise)"; };
+  const sgn=v=>(v>=0?"+":"")+v.toFixed(3), B=["W","DispFilt"];
+  const diss=N.raw.diag.dissociation, di=m=>diss.method.indexOf(m), mx=N.raw.diag.matched;
+  const mc=(v,y)=>{ for(let i=0;i<mx.variable.length;i++) if(mx.variable[i]===v&&mx.versus[i]===y) return mx.mean_spearman[i]; return null; };
+  const rows=[
+    ["C1 · replication, ρ_t AUC (DBS / SmD / wEffRes against W / DispFilt)", B.map(b=>`${fmt(A("DBS",1),2)} / ${fmt(A("SmD",1),2)} / ${fmt(A("wEffRes",1),2)} vs ${fmt(A(b,1),2)}`)],
+    ["C3 · budgets where ρ_C is high but ρ_t low", B.map(b=>Math.round(100*diss.structure_ok_function_bad[di(b)])+"%")],
+    ["C3 · components against ρ_t / ρ_C at equal X (Spearman, all methods)", [`${fmt(mc("components","rho_t"),2)} / ${fmt(mc("components","rho_C"),2)}`,"(same for both)"]],
+    ["C4 · spanning tree: share of the ρ_t gap to DBS closed", B.map(b=>closed(b,b+"+T",1))],
+    ["C4 · spanning tree: change in ρ_C", B.map(b=>sgn(A(b+"+T",0)-A(b,0)))],
+    ["C5 · spanning tree: share of the ξ⁻¹ gap to DBS closed", B.map(b=>closed(b,b+"+T",2))],
+    ["C6 · metric backbone first: share of the remaining ξ⁻¹ gap closed", B.map(b=>closed(b+"+T",b+"+B",2))],
+    ["C7 · between-community fill: change in ξ⁻¹ against the plain metric-backbone fill", B.map(b=>sgn(A(b+"|between",2)-A(b+"+B",2)))]];
+  $("cc-evidence").innerHTML=`<table><tr><th>claim · evidence (this network, AUC from the metric-backbone size)</th><th>W</th><th>DispFilt</th></tr>`+rows.map(r=>`<tr><td style="text-align:left">${r[0]}</td><td>${r[1][0]}</td><td>${r[1][1]}</td></tr>`).join("")+"</table>";
+}
+
 /* ---------- extra interactivity: hover, compare, keyboard ---------- */
 M.forEach(m=>$("lens-m2").add(new Option(m,m)));
+if(HAS_V) MV.forEach(v=>$("lens-m2").add(new Option(VLAB[v],v)));
 $("lens-m2").onchange=render;
 $("lens-m").addEventListener("change",()=>{ if($("lens-m2").value===$("lens-m").value) $("lens-m2").value=""; });
 (function(){ const c=$("lens-c");
@@ -504,7 +677,7 @@ ${S.lensM2}: ${k2[be]?"kept":"removed"}`:"")); }
 $("lens-multi").addEventListener("click",ev=>{ const cell=ev.target.closest(".cell"); if(!cell) return; const m=cell.querySelector("canvas").id.slice(3); $("lens-m").value=m; $("lens-all").checked=false; render(); });
 $("lens-multi").addEventListener("mouseover",ev=>{ const cell=ev.target.closest(".cell"); $("lens-multi").style.cursor=cell?"pointer":""; });
 document.addEventListener("keydown",ev=>{ if(["SELECT","TEXTAREA"].includes(ev.target.tagName)||(ev.target.tagName==="INPUT"&&ev.target.type!=="range"&&ev.target.type!=="checkbox")) return;
-  if(!["lens","curves","epi","auc"].includes(S.tab)) return; const d=ev.shiftKey?.05:.005;
+  if(!["lens","curves","epi","auc","ext"].includes(S.tab)) return; const d=ev.shiftKey?.05:.005;
   if(ev.key==="ArrowRight"){ setX(S.x+d); ev.preventDefault(); render(); } if(ev.key==="ArrowLeft"){ setX(S.x-d); ev.preventDefault(); render(); } });
 document.addEventListener("keydown",ev=>{ if(ev.target.tagName==="INPUT"||ev.target.tagName==="SELECT") return; const i=+ev.key; if(i>=1&&i<=TABS.length) go(TABS[i-1][0]); });
 

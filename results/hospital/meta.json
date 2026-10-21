@@ -1,0 +1,25 @@
+{
+  "network": "hospital",
+  "nodes": 75,
+  "edges": 1139,
+  "metric_edges": 217,
+  "metric_X_percent": 13.427,
+  "paper_nodes": 75,
+  "paper_edges": 1139,
+  "paper_metric_X_percent": 13.43,
+  "X_conn": {
+    "W": 0.47417840375586856,
+    "DispFilt": 0.8,
+    "wEffRes": 0.06948356807511737,
+    "SmD": 0.11737089201877934,
+    "DBS": 0.0
+  },
+  "balanced_lambda_opt": 0.3455723092679328,
+  "runs": 100,
+  "beta": 1.5144955197495646,
+  "beta_capped": false,
+  "target_half_time": 20.0,
+  "achieved_half_time": 20.0,
+  "n_seeds": 11,
+  "seconds": 2.1
+}

@@ -5,8 +5,6 @@ k runs from n-1 (X = 0) to |G| (X = 1) one edge at a time, so X is swept at the 
 rho_C = Spearman correlation between node eigenvector centralities of the full and sparsified proximity matrix,
 where removed edges get proximity 0 and kept edges keep their proximity.
 """
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
@@ -17,7 +15,6 @@ from .backbones import adjusted_size
 from .sparsify import METHODS, ranking
 
 ZERO = 1e-12  # centrality entries below this are numerical noise on other components -> tied at 0
-SWEEP_CSV = Path("results/hospital/sweep_rhoC.csv")
 
 
 class Network:
@@ -67,13 +64,14 @@ def rho_grid(net, n_points=200):
     return sorted({round((net.n - 1) + x * (net.m - (net.n - 1))) for x in np.linspace(0, 1, n_points)})
 
 
-def sweep(net, methods=METHODS, seed=0, ks=None):
-    """One row per (method, number of edges k): X, rho_C, number of connected components."""
+def sweep(net, methods=METHODS, seed=0, ks=None, orders=None):
+    """One row per (method, number of edges k): X, rho_C, number of connected components.
+    `orders` optionally maps a method name to a ready-made edge order (most important first)."""
     c_full = eigenvector_centrality(net.adjacency())
     ks = rho_grid(net) if ks is None else ks
     rows = []
     for method in methods:
-        order = ranking(net.table, method, seed)
+        order = orders[method] if orders and method in orders else ranking(net.table, method, seed)
         for k in ks:
             keep = order[:k]
             rows.append((method, k, adjusted_size(net.n, net.m, k),
@@ -95,19 +93,3 @@ def connectivity_limits(net, methods=METHODS, seed=0):
             k_conn = k
         out[method] = adjusted_size(net.n, net.m, k_conn)
     return out
-
-
-def run(table, save_to=SWEEP_CSV, seed=0):
-    df = sweep(Network(table), seed=seed)
-    if save_to is not None:
-        Path(save_to).parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(save_to, index=False)
-    return df
-
-
-if __name__ == "__main__":
-    from .backbones import edge_table
-    from .data import load_graph
-
-    df = run(edge_table(load_graph()), save_to=None)
-    print(df.groupby("method").rho_C.describe()[["min", "mean"]])

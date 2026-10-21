@@ -1,0 +1,31 @@
+setting,measure,order,network
+base,AUC_rho_C,DispFilt > W > SmD > DBS > wEffRes,hospital
+base,AUC_rho_t,SmD > DBS > wEffRes > W > DispFilt,hospital
+base,AUC_xi,wEffRes > SmD > DBS > W > DispFilt,hospital
+beta_40,AUC_rho_C,DispFilt > W > SmD > DBS > wEffRes,hospital
+beta_40,AUC_rho_t,SmD > DBS > wEffRes > W > DispFilt,hospital
+beta_40,AUC_xi,wEffRes > SmD > DBS > W > DispFilt,hospital
+beta_80,AUC_rho_C,DispFilt > W > SmD > DBS > wEffRes,hospital
+beta_80,AUC_rho_t,SmD > DBS > wEffRes > W > DispFilt,hospital
+beta_80,AUC_xi,wEffRes > DBS > SmD > W > DispFilt,hospital
+dispfilt_norm,AUC_rho_C,DispFiltNorm,hospital
+dispfilt_norm,AUC_rho_t,DispFiltNorm,hospital
+dispfilt_norm,AUC_xi,DispFiltNorm,hospital
+runs_300,AUC_rho_C,DispFilt > W > SmD > DBS > wEffRes,hospital
+runs_300,AUC_rho_t,SmD > DBS > wEffRes > W > DispFilt,hospital
+runs_300,AUC_xi,wEffRes > DBS > SmD > W > DispFilt,hospital
+base,AUC_rho_C,DBS > DispFilt > SmD > W > wEffRes,workplace1
+base,AUC_rho_t,DBS > SmD > wEffRes > W > DispFilt,workplace1
+base,AUC_xi,DBS > SmD > wEffRes > W > DispFilt,workplace1
+beta_40,AUC_rho_C,DBS > DispFilt > SmD > W > wEffRes,workplace1
+beta_40,AUC_rho_t,DBS > SmD > wEffRes > W > DispFilt,workplace1
+beta_40,AUC_xi,SmD > DBS > wEffRes > W > DispFilt,workplace1
+beta_80,AUC_rho_C,DBS > DispFilt > SmD > W > wEffRes,workplace1
+beta_80,AUC_rho_t,DBS > SmD > wEffRes > W > DispFilt,workplace1
+beta_80,AUC_xi,DBS > SmD > wEffRes > W > DispFilt,workplace1
+dispfilt_norm,AUC_rho_C,DispFiltNorm,workplace1
+dispfilt_norm,AUC_rho_t,DispFiltNorm,workplace1
+dispfilt_norm,AUC_xi,DispFiltNorm,workplace1
+runs_300,AUC_rho_C,DBS > DispFilt > SmD > W > wEffRes,workplace1
+runs_300,AUC_rho_t,DBS > SmD > wEffRes > W > DispFilt,workplace1
+runs_300,AUC_xi,SmD > DBS > wEffRes > W > DispFilt,workplace1

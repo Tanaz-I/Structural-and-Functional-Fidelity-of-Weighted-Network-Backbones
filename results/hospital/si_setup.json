@@ -1,0 +1,21 @@
+{
+  "beta": 1.5144955197495646,
+  "beta_max_valid": 2.100334448160535,
+  "beta_capped": false,
+  "target_half_time": 20.0,
+  "achieved_half_time": 20.0,
+  "n_seeds": 11,
+  "seed_nodes": [
+    1613,
+    1485,
+    1210,
+    1115,
+    1245,
+    1130,
+    1378,
+    1373,
+    1332,
+    1535,
+    1525
+  ]
+}

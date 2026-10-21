@@ -3,17 +3,515 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Backbone Lab</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%231f1c17' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%231f1c17'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css">
+<title>Backbone Fidelity Lab</title>
+<style>
+:root{--bg:#f6f5f2;--card:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--grid:#e6e5e1;--line:#d6d4ce;--accent:#2a78d6;--warn:#c4361f;--off:#cfcdc7;--canvas:#eef4fb;--sus:#9ab8dd;--hot:#e5391f;--seed:#f2b01e;--h1:#1f5fbf;--h2:#14a38b}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--card:#1d1d1b;--ink:#f1f0ec;--ink2:#a9a7a0;--grid:#2d2d2a;--line:#3a3a36;--accent:#5b9bec;--warn:#ff7a62;--off:#3b3b37;--canvas:#18222f;--sus:#46628a;--hot:#ff5a3c;--seed:#ffc83d;--h1:#173d7a;--h2:#0e6b5c}}
+:root[data-theme="dark"]{--bg:#141413;--card:#1d1d1b;--ink:#f1f0ec;--ink2:#a9a7a0;--grid:#2d2d2a;--line:#3a3a36;--accent:#5b9bec;--warn:#ff7a62;--off:#3b3b37;--canvas:#18222f;--sus:#46628a;--hot:#ff5a3c;--seed:#ffc83d;--h1:#173d7a;--h2:#0e6b5c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;border-bottom:0;background:linear-gradient(110deg,var(--h1),var(--h2));color:#fff}
+h1{font-size:19px;margin:0;font-weight:650}
+header .sub{color:#e3f0ff;font-size:13px;flex:1 1 280px}
+select,button,input{font:inherit;color:var(--ink)}
+header select,header button{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.35)}
+header select option{color:#000}
+select,button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
+button:hover,select:hover{border-color:var(--accent)}
+nav{display:flex;gap:4px;padding:8px 16px 0;overflow-x:auto;background:var(--card);border-bottom:1px solid var(--line)}
+nav button{border:0;border-bottom:3px solid transparent;border-radius:0;background:none;padding:8px 12px;color:var(--ink2);white-space:nowrap}
+nav button.on{color:var(--accent);border-bottom-color:var(--accent);font-weight:650;background:linear-gradient(#0000,color-mix(in srgb,var(--accent) 12%,transparent))}
+main{padding:16px;max-width:1280px;margin:auto}
+.tab{display:none}.tab.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 2px 8px #0000000d}
+.card h2{font-size:15px;margin:0 0 4px}
+.note{color:var(--ink2);font-size:13px;margin:2px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:10px}
+.row label{display:flex;gap:8px;align-items:center;font-size:14px}
+button.primary,#epi-play{background:var(--accent);color:#fff;border-color:var(--accent)}
+input[type=range]{accent-color:var(--accent);width:240px}
+canvas{display:block;width:100%;border-radius:8px;background:var(--canvas)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:8px 0}
+.stat{background:var(--bg);border-radius:10px;padding:8px 12px;border-left:4px solid var(--c,var(--accent))}
+.stat:nth-child(6n+1){--c:#2a78d6}.stat:nth-child(6n+2){--c:#eb6834}.stat:nth-child(6n+3){--c:#1baf7a}.stat:nth-child(6n+4){--c:#eda100}.stat:nth-child(6n+5){--c:#e87ba4}.stat:nth-child(6n){--c:#8b6bd9}
+.stat b{display:block;font-size:22px;color:var(--c);font-weight:650;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--ink2)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.legend label{display:flex;gap:6px;align-items:center;cursor:pointer;user-select:none}
+.sw{width:22px;height:0;border-top:3px solid}
+.small-mult{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.small-mult .cell{border:1px solid var(--line);border-radius:10px;padding:6px;background:var(--bg)}
+.small-mult canvas{background:var(--canvas)}
+@media(min-width:900px){#epi-multi{grid-template-columns:repeat(3,1fr)}}
+.small-mult .cell div{font-size:12px;display:flex;justify-content:space-between;margin-bottom:2px}
+table{border-collapse:collapse;font-size:13px;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:5px 8px;border-bottom:1px solid var(--grid);text-align:right}
+th:first-child,td:first-child{text-align:left}
+.bad{color:var(--warn);font-weight:600}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 9px;border-radius:7px;font-size:12px;display:none;z-index:9;white-space:pre;font-variant-numeric:tabular-nums}
+.hero{display:grid;gap:8px;font-size:14px}
+.hero ol{margin:4px 0 0 18px;padding:0}
+.chip{display:inline-block;border-radius:99px;padding:2px 11px;font-size:12px;font-weight:600;border:2px solid}
+</style>
 </head>
 <body>
-<div class="shell">
-  <aside class="rail" id="rail"></aside>
-  <main id="main" tabindex="-1"></main>
-</div>
-<script type="module" src="app.js"></script>
+<header>
+  <h1>Backbone Fidelity Lab</h1>
+  <div class="sub">Keep fewer edges, keep the behaviour? Explore five sparsification methods on temporal contact networks (replication of Pereira, Costa &amp; Rocha 2026).</div>
+  <label>Network <select id="net"></select></label>
+  <button id="theme" title="Toggle light / dark">◐</button>
+</header>
+<nav id="nav"></nav>
+<main>
+
+<section class="tab" id="t-intro">
+  <div class="card hero">
+    <h2>The question</h2>
+    <div>A contact network has many weak edges. A <b>backbone</b> keeps only the important ones. <b>X</b> is the adjusted size of the backbone:
+    0 = just a spanning tree, 1 = the full graph. Every method is compared at the <i>same</i> X, then scored on how well it preserves what the network does:</div>
+    <ol>
+      <li><b>ρ<sub>C</sub></b> – rank correlation of eigenvector centrality (who is important)</li>
+      <li><b>ρ<sub>t</sub></b> – rank correlation of SI infection times (who gets infected when)</li>
+      <li><b>ξ⁻¹</b> – ratio of half-infection times (how fast the epidemic spreads)</li>
+    </ol>
+    <div>Methods: <span id="chips"></span></div>
+  </div>
+  <div class="card"><h2>This network</h2><div class="stats" id="intro-stats"></div>
+    <div class="note">Use the tabs: <b>Network lens</b> to see the backbones, <b>Curves</b> and <b>AUC</b> for the scores, <b>Epidemic</b> to watch spreading, <b>λ study</b> to pick the DBS parameter.</div></div>
+  <div class="card"><h2>Headline results (this network)</h2><div id="headline"></div></div>
+</section>
+
+<section class="tab" id="t-lens">
+  <div class="card">
+    <div class="row">
+      <label>Method <select id="lens-m"></select></label>
+      <label>X <input type="range" id="lens-x" min="0" max="1" step="0.005"> <b id="lens-xv"></b></label>
+      <label>Compare with <select id="lens-m2"><option value="">(none)</option></select></label>
+      <label><input type="checkbox" id="lens-removed" checked> show removed edges</label>
+      <label><input type="checkbox" id="lens-all"> compare all five</label>
+      <button id="lens-sweep" class="primary">▶ sweep X (1 → 0)</button>
+      <button id="lens-metric">jump to metric backbone</button>
+    </div>
+    <div class="note">Edge colour = kept by the method; width ∝ proximity; node size and colour = eigenvector centrality of the full graph (<span style="color:hsl(205 78% 52%)">blue low</span> → <span style="color:hsl(40 78% 48%)">amber high</span>). <span style="color:var(--warn)">Red nodes</span> are cut off from the main component.</div>
+    <div class="note" id="lens-hint">Hover a node to light up its edges, hover an edge for its scores. Pick a second method under “Compare with” to see exactly which edges differ. Click a panel in “compare all five” to open it. Arrow keys move X.</div>
+    <div id="lens-single"><canvas id="lens-c" height="560"></canvas></div>
+    <div class="small-mult" id="lens-multi" style="display:none"></div>
+    <div class="stats" id="lens-stats"></div>
+  </div>
+</section>
+
+<section class="tab" id="t-curves">
+  <div class="card">
+    <div class="row">
+      <label>X cursor <input type="range" id="cur-x" min="0" max="1" step="0.005"> <b id="cur-xv"></b></label>
+      <div class="legend" id="cur-legend"></div>
+    </div>
+    <div class="note">Fidelity against backbone size. Dots mark each method's connectivity limit X̃ (the paper starts the AUC there). Hover for values.</div>
+    <div class="grid g3"><div><canvas id="ch-rc" height="300"></canvas></div><div><canvas id="ch-rt" height="300"></canvas></div><div><canvas id="ch-xi" height="300"></canvas></div></div>
+    <div id="cur-table" style="margin-top:10px"></div>
+  </div>
+</section>
+
+<section class="tab" id="t-auc">
+  <div class="card">
+    <div class="row">
+      <label>Integration limit
+        <select id="auc-mode"><option value="own">each method's own X̃ (paper rule)</option><option value="fixed">same limit for all (metric backbone size)</option></select></label>
+      <label><input type="checkbox" id="auc-zoom"> zoom axis to 0.6 – 1</label>
+    </div>
+    <div class="note">Area under the fidelity curve above the limit (Eq. 16). Switching the limit can change who wins – W and DispFilt look good only when evaluated on the range where they are still connected.</div>
+    <canvas id="auc-c" height="340"></canvas>
+    <div id="auc-table" style="margin-top:10px"></div>
+  </div>
+  <div class="card" id="auc-all-card"><h2>All networks</h2><div class="note">One dot per network. Median in the table. The cross-network tests of the paper need many networks.</div>
+    <canvas id="auc-all" height="320"></canvas></div>
+</section>
+
+<section class="tab" id="t-epi">
+  <div class="card">
+    <div class="row">
+      <label>Method <select id="epi-m"></select></label>
+      <label>X <input type="range" id="epi-x" min="0" max="1" step="0.005"> <b id="epi-xv"></b></label>
+      <label><input type="checkbox" id="epi-race"> race all five methods</label>
+      <label>β × <input type="range" id="epi-beta" min="0.3" max="1.6" step="0.05" value="1" style="width:130px"> <b id="epi-bv">1.00</b></label>
+      <button id="epi-play">▶ play</button><button id="epi-new">new run</button>
+      <label>speed <input type="range" id="epi-sp" min="1" max="12" value="4" style="width:100px"></label>
+    </div>
+    <div class="note">SI model: an infected node infects each susceptible neighbour with probability β·p<sub>ij</sub> per step (β calibrated so the full graph is half-infected after about 20 steps). <b>Click a node</b> to choose the seed. <span style="color:var(--seed)">●</span> seed · <span style="color:var(--hot)">●</span> infected · <span style="color:var(--sus)">●</span> susceptible.</div>
+    <div class="small-mult" id="epi-multi" style="display:none"></div>
+    <div class="grid g2" id="epi-single">
+      <div><div class="note"><b>Original network</b> – step <span id="epi-t1"></span></div><canvas id="epi-a" height="420"></canvas></div>
+      <div><div class="note"><b id="epi-bt"></b> – step <span id="epi-t2"></span></div><canvas id="epi-b" height="420"></canvas></div>
+    </div>
+    <div class="stats" id="epi-stats"></div>
+    <canvas id="epi-curve" height="260"></canvas><div class="legend" id="epi-leg" style="margin-top:4px"></div>
+  </div>
+</section>
+
+<section class="tab" id="t-lam">
+  <div class="card">
+    <div class="row">
+      <label>λ <input type="range" id="lam-s" min="0" max="1000" step="1" style="width:320px"> <b id="lam-v"></b></label>
+      <button id="lam-mst">λ = ∞ (tree)</button><button id="lam-1">λ = 1 (metric)</button>
+    </div>
+    <div class="note">DBS keeps edges with importance λ<sub>ij</sub> ≥ λ. Small λ keeps almost everything, λ = 1 is the metric backbone, λ → ∞ is the spanning tree.</div>
+    <div class="grid g2"><div><canvas id="lam-g" height="420"></canvas></div><div><canvas id="lam-c" height="420"></canvas><div class="legend" id="lam-leg"><span><b style="color:#2a78d6">━ ρ_C</b></span><span><b style="color:#eb6834">╍ ρ_t</b></span><span><b style="color:#1baf7a">┈ ξ⁻¹</b></span><span><b style="color:var(--ink2)">╍ 1 − X</b></span><span>★ optimum for the weights below · shaded: paper mode 0.3 ± 0.1</span></div></div></div>
+    <div class="stats" id="lam-stats"></div>
+  </div>
+  <div class="card">
+    <h2>What should I optimise? (Eq. 17)</h2>
+    <div class="row"><label>Preset <select id="w-pre"></select></label></div>
+    <div class="row" id="w-sliders"></div>
+    <div class="stats" id="w-out"></div>
+    <div class="note">Drag the weights: the best λ for the weighted objective w<sub>C</sub>ρ<sub>C</sub> + w<sub>t</sub>ρ<sub>t</sub> + w<sub>ξ</sub>ξ⁻¹ + w<sub>X</sub>(1 − X) is found on the stored λ grid. The paper reports a typical optimum near 0.3 (shaded).</div>
+  </div>
+</section>
+
+</main>
+<div id="tip"></div>
+<script src="data.js"></script>
+<script>
+"use strict";
+const D = window.DATA, M = D.methods;
+const COL = {DBS:"#2a78d6",SmD:"#eb6834",wEffRes:"#1baf7a",DispFilt:"#eda100",W:"#e87ba4"};
+const DASH = {DBS:[],SmD:[7,4],wEffRes:[9,3,2,3],DispFilt:[2,3],W:[12,3]};
+const $ = id => document.getElementById(id);
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v,d=3) => v==null ? "–" : (v==="inf"||v===Infinity ? "∞" : (+v).toFixed(d));
+const num = v => v==="inf" ? Infinity : v;
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+const S = {bm:1,net:D.networks.hospital?"hospital":Object.keys(D.networks)[0], x:0.134, tab:"intro", seed:null, hidden:new Set(), epi:null};
+let N;                                    // current network (derived)
+
+/* ---------- derived network data ---------- */
+function prep(raw){
+  const n = raw.nodes.length, m = raw.edges.u.length;
+  const o = {raw, n, m, u:raw.edges.u, v:raw.edges.v, p:raw.edges.p, lam:raw.edges.lam.map(num)};
+  o.kOf = X => Math.round((n-1) + X*(m-(n-1)));
+  o.xOf = k => (k-(n-1))/(m-(n-1));
+  o.metricK = raw.edges.s.filter(s => s <= 1+1e-6).length;
+  o.metricX = o.xOf(o.metricK);
+  o.keep = (method,X) => { const a = new Uint8Array(m), k = o.kOf(X), r = raw.rank[method]; for(let i=0;i<k;i++) a[r[i]] = 1; return a; };
+  o.keepLam = L => { const a = new Uint8Array(m); let c = 0; for(let i=0;i<m;i++) if(o.lam[i] >= L*(1-1e-9)){a[i]=1;c++;} return [a,c]; };
+  o.comps = keep => {                     // union-find -> component id per node, size of each, count
+    const par = Array.from({length:n},(_,i)=>i), f = x => { while(par[x]!==x){par[x]=par[par[x]];x=par[x];} return x; };
+    for(let e=0;e<m;e++) if(keep[e]) par[f(o.u[e])] = f(o.v[e]);
+    const cnt = {}; for(let i=0;i<n;i++){const r=f(i); cnt[r]=(cnt[r]||0)+1;}
+    let big=-1,bs=0; for(const r in cnt) if(cnt[r]>bs){bs=cnt[r];big=+r;}
+    return {inMain:Array.from({length:n},(_,i)=>f(i)===big), count:Object.keys(cnt).length, main:bs};
+  };
+  o.rhoC = (method,X) => { const r = raw.rho[method], k = o.kOf(X); let lo=0, hi=r.n_edges.length-1;
+    while(lo<hi){ const mid=(lo+hi)>>1; if(r.n_edges[mid]<k) lo=mid+1; else hi=mid; }
+    if(lo>0 && Math.abs(r.n_edges[lo-1]-k)<Math.abs(r.n_edges[lo]-k)) lo--;
+    return {rho:r.rho_C[lo], comps:r.components[lo]}; };
+  o.si = (method,X) => { const s = raw.si[method], xs = s.X; if(X<=xs[0]) return {rho_t:s.rho_t[0],xi:s.xi[0]};
+    for(let i=1;i<xs.length;i++) if(X<=xs[i]){const t=(X-xs[i-1])/(xs[i]-xs[i-1]); return {rho_t:s.rho_t[i-1]+t*(s.rho_t[i]-s.rho_t[i-1]),xi:s.xi[i-1]+t*(s.xi[i]-s.xi[i-1])};}
+    return {rho_t:s.rho_t.at(-1),xi:s.xi.at(-1)}; };
+  const q = (a,f) => [...a].sort((x,y)=>x-y)[Math.min(a.length-1,Math.max(0,Math.round(f*(a.length-1))))];
+  const xs = raw.pos.map(p=>p[0]), ys = raw.pos.map(p=>p[1]);
+  o.bx=[q(xs,.02),q(xs,.98)]; o.by=[q(ys,.02),q(ys,.98)];
+  o.cmax = Math.max(...raw.centrality);
+  return o;
+}
+
+/* ---------- canvas helpers ---------- */
+function setup(c, h){ const r = devicePixelRatio||1, w = c.clientWidth; c.width = w*r; c.height = (h||c.getAttribute("height"))*r; c.style.height = (c.height/r)+"px";
+  const g = c.getContext("2d"); g.setTransform(r,0,0,r,0,0); return [g, w, c.height/r]; }
+function layout(w,h,pad=18){ const sx=(w-2*pad)/(N.bx[1]-N.bx[0]||1), sy=(h-2*pad)/(N.by[1]-N.by[0]||1), s=Math.min(sx,sy);
+  const ox=(w-s*(N.bx[1]-N.bx[0]))/2, oy=(h-s*(N.by[1]-N.by[0]))/2;
+  return N.raw.pos.map(p=>[clamp(ox+(p[0]-N.bx[0])*s,6,w-6), clamp(oy+(p[1]-N.by[0])*s,6,h-6)]); }
+
+function drawGraph(c, keep, opt){
+  const [g,w,h] = setup(c, opt.h); const P = layout(w,h); c._P = P;
+  g.clearRect(0,0,w,h);
+  const cp = N.comps(keep), color = opt.color;
+  if(opt.showRemoved){ g.strokeStyle = css("--off"); g.globalAlpha = .35; g.lineWidth = .5; g.beginPath();
+    for(let e=0;e<N.m;e++) if(!keep[e]){ g.moveTo(...P[N.u[e]]); g.lineTo(...P[N.v[e]]); } g.stroke(); g.globalAlpha = 1; }
+  g.lineCap = "round";
+  const pm = Math.max(...N.p), wd = e => Math.sqrt(N.p[e]/pm);
+  const seg = (e,col,a,lw) => { g.strokeStyle = col; g.globalAlpha = a; g.lineWidth = lw; g.beginPath(); g.moveTo(...P[N.u[e]]); g.lineTo(...P[N.v[e]]); g.stroke(); };
+  if(opt.keep2){ for(let e=0;e<N.m;e++){ const a=keep[e], b=opt.keep2[e];
+      if(a&&b) seg(e,css("--ink2"),.4,.6+2.2*wd(e)); else if(a) seg(e,color,.95,1+2.4*wd(e)); else if(b) seg(e,opt.color2,.95,1+2.4*wd(e)); } }
+  else for(let e=0;e<N.m;e++) if(keep[e]) seg(e,color,.35+.5*wd(e),.6+3.2*wd(e));
+  const near = new Set();
+  if(opt.hl!=null){ for(let e=0;e<N.m;e++) if((keep[e]||(opt.keep2&&opt.keep2[e])) && (N.u[e]===opt.hl||N.v[e]===opt.hl)){ seg(e,css("--seed"),1,2.8); near.add(N.u[e]===opt.hl?N.v[e]:N.u[e]); } }
+  g.globalAlpha = 1;
+  const base = opt.small ? 2.5 : 4;
+  for(let i=0;i<N.n;i++){ const r = base + (opt.small?4:9)*Math.sqrt(N.raw.centrality[i]/N.cmax);
+    const t = Math.sqrt(N.raw.centrality[i]/N.cmax), col = opt.nodeColor ? opt.nodeColor(i) : (cp.inMain[i] ? `hsl(${205-165*t} 78% ${52-4*t}%)` : css("--warn"));
+    g.fillStyle = col; g.beginPath(); g.arc(P[i][0],P[i][1],r,0,6.283); g.fill();
+    g.lineWidth = 1.5; g.strokeStyle = (!opt.nodeColor&&!cp.inMain[i]) ? css("--hot") : "#fff"; g.stroke();
+    if(opt.hl===i||near.has(i)){ g.lineWidth = 3; g.strokeStyle = css("--seed"); g.beginPath(); g.arc(P[i][0],P[i][1],r+3,0,6.283); g.stroke(); } }
+  return cp;
+}
+
+/* ---------- generic line chart ---------- */
+function lineChart(c, o){          // o: series[{name,color,dash,x,y,dots,band}], xlim, ylim, xlabel, ylabel, logx, cursor, marks
+  const [g,w,h] = setup(c, o.h); const L=46, R=12, T=14, B=34; c._o = o; c._geom = {L,R,T,B,w,h};
+  const [x0,x1] = o.xlim, [y0,y1] = o.ylim, lx = v => o.logx ? Math.log(v) : v;
+  const X = v => L + (lx(v)-lx(x0))/(lx(x1)-lx(x0))*(w-L-R), Y = v => h-B - (v-y0)/(y1-y0)*(h-B-T);
+  c._X = X; c._Y = Y; g.clearRect(0,0,w,h);
+  g.font = "12px system-ui"; g.fillStyle = css("--ink2"); g.strokeStyle = css("--grid"); g.lineWidth = 1;
+  for(let i=0;i<=4;i++){ const v=y0+(y1-y0)*i/4, y=Y(v); g.beginPath(); g.moveTo(L,y); g.lineTo(w-R,y); g.stroke(); g.textAlign="right"; g.fillText(v.toFixed(2),L-6,y+4); }
+  const xt = o.xticks || [0,.2,.4,.6,.8,1]; g.textAlign="center";
+  for(const v of xt){ const x=X(v); g.fillText(o.logx||Number.isInteger(v)&&v>1 ? String(v) : v.toFixed(1), x, h-B+16); }
+  g.fillText(o.xlabel||"", L+(w-L-R)/2, h-4);
+  g.save(); g.translate(12,T+(h-B-T)/2); g.rotate(-Math.PI/2); g.textAlign="center"; g.fillText(o.ylabel||"",0,0); g.restore();
+  if(o.band){ g.fillStyle = css("--accent"); g.globalAlpha=.12; g.fillRect(X(o.band[0]),T,X(o.band[1])-X(o.band[0]),h-B-T); g.globalAlpha=1; }
+  for(const s of o.series){ if(S.hidden.has(s.name)) continue;
+    g.strokeStyle = s.color; g.lineWidth = s.w||2; g.setLineDash(s.dash||[]); g.beginPath();
+    s.x.forEach((xv,i)=>{ const px=X(clamp(xv,x0,x1)), py=Y(clamp(s.y[i],y0,y1)); i?g.lineTo(px,py):g.moveTo(px,py); }); g.stroke(); g.setLineDash([]);
+    for(const d of (s.dots||[])){ g.fillStyle=s.color; g.beginPath(); g.arc(X(d[0]),Y(d[1]),5,0,6.283); g.fill(); g.strokeStyle=css("--card"); g.lineWidth=1.5; g.stroke(); } }
+  if(o.cursor!=null){ const x=X(o.cursor); g.strokeStyle=css("--ink"); g.globalAlpha=.5; g.setLineDash([4,3]); g.beginPath(); g.moveTo(x,T); g.lineTo(x,h-B); g.stroke(); g.setLineDash([]); g.globalAlpha=1; }
+  for(const mk of (o.marks||[])){ const x=X(mk.x), y=Y(mk.y); g.fillStyle=css("--ink"); g.beginPath(); g.moveTo(x,y-9); g.lineTo(x+3,y-3); g.lineTo(x+9,y-3); g.lineTo(x+4,y+1); g.lineTo(x+6,y+8); g.lineTo(x,y+4); g.lineTo(x-6,y+8); g.lineTo(x-4,y+1); g.lineTo(x-9,y-3); g.lineTo(x-3,y-3); g.closePath(); g.fill(); }
+  if(!c._hover){ c._hover = true;
+    c.addEventListener("mousemove", ev=>{ const o=c._o, r=c.getBoundingClientRect(), mx=ev.clientX-r.left; if(!o.hoverX){return;}
+      const xv = c._inv(mx); const lines=[o.hoverX(xv)]; const rows=o.series.filter(s=>!S.hidden.has(s.name)).map(s=>[s.name,s.at?s.at(xv):null]).filter(a=>a[1]!=null).sort((a,b)=>b[1]-a[1]);
+      showTip(ev, lines[0]+"\n"+rows.map(a=>a[0].padEnd(9)+fmt(a[1])).join("\n")); });
+    c.addEventListener("mouseleave", hideTip);
+    c.addEventListener("click", ev=>{ if(c._o.onClick){ const r=c.getBoundingClientRect(); c._o.onClick(c._inv(ev.clientX-r.left)); } }); }
+  c._inv = px => { const gm=c._geom, t=(px-gm.L)/(gm.w-gm.L-gm.R), a=lx(x0), b=lx(x1), v=a+t*(b-a); return clamp(o.logx?Math.exp(v):v, x0, x1); };
+}
+const tip = $("tip");
+function showTip(ev,t){ tip.textContent=t; tip.style.display="block"; tip.style.left=Math.min(ev.clientX+14,innerWidth-190)+"px"; tip.style.top=(ev.clientY+14)+"px"; }
+function hideTip(){ tip.style.display="none"; }
+const interp = (xs,ys) => v => { if(v<=xs[0]) return ys[0]; for(let i=1;i<xs.length;i++) if(v<=xs[i]) return ys[i-1]+(v-xs[i-1])/(xs[i]-xs[i-1])*(ys[i]-ys[i-1]); return ys.at(-1); };
+
+/* ---------- shell ---------- */
+const TABS = [["intro","Overview"],["lens","Network lens"],["curves","Curves"],["auc","AUC"],["epi","Epidemic"],["lam","λ study"]];
+TABS.forEach(([id,t])=>{ const b=document.createElement("button"); b.textContent=t; b.dataset.id=id; b.onclick=()=>go(id); $("nav").appendChild(b); });
+Object.keys(D.networks).forEach(k=>$("net").add(new Option(k,k)));
+$("net").value=S.net;
+function go(id){ S.tab=id; document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.id===id));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.id==="t-"+id)); history.replaceState(null,"","#"+id); render(); }
+function legendInto(el){ el.innerHTML=""; M.forEach(m=>{ const l=document.createElement("label"); const cb=document.createElement("input"); cb.type="checkbox"; cb.checked=!S.hidden.has(m);
+    cb.onchange=()=>{ cb.checked?S.hidden.delete(m):S.hidden.add(m); render(); };
+    l.append(cb); const sw=document.createElement("span"); sw.className="sw"; sw.style.borderColor=COL[m]; sw.style.borderTopStyle=m==="DBS"?"solid":"dashed"; l.append(sw,m); el.append(l); }); }
+M.forEach(m=>{ ["lens-m","epi-m"].forEach(id=>$(id).add(new Option(m,m))); const c=document.createElement("span"); c.className="chip"; c.style.borderColor=COL[m]; c.style.color=COL[m]; c.style.background=COL[m]+"1f"; c.textContent=m; $("chips").append(c," "); });
+$("lens-m").value=$("epi-m").value="DBS";
+function setX(x){ S.x = clamp(x,0,1); ["lens-x","cur-x","epi-x"].forEach(id=>$(id).value=S.x); ["lens-xv","cur-xv","epi-xv"].forEach(id=>$(id).textContent=S.x.toFixed(3)+"  ("+N.kOf(S.x)+" edges)"); }
+["lens-x","cur-x","epi-x"].forEach(id=>$(id).oninput=e=>{ setX(+e.target.value); if(id==="epi-x") epiReset(); render(); });
+$("lens-m").onchange=render; $("lens-removed").onchange=render; $("lens-all").onchange=render;
+let sweepT=null;
+$("lens-sweep").onclick=()=>{ if(sweepT){clearInterval(sweepT);sweepT=null;$("lens-sweep").textContent="▶ sweep X (1 → 0)";return;}
+  $("lens-sweep").textContent="❚❚ stop"; if(S.x<=0.01) setX(1);
+  sweepT=setInterval(()=>{ if(S.tab!=="lens"||S.x<=0.001){clearInterval(sweepT);sweepT=null;$("lens-sweep").textContent="▶ sweep X (1 → 0)";return;} setX(S.x-0.006); render(); },70); };
+$("lens-metric").onclick=()=>{ setX(N.metricX); render(); };
+$("net").onchange=e=>{ S.net=e.target.value; S.seed=null; load(); };
+$("theme").onclick=()=>{ const r=document.documentElement; const dark = r.dataset.theme ? r.dataset.theme==="dark" : matchMedia("(prefers-color-scheme:dark)").matches; r.dataset.theme = dark?"light":"dark"; render(); };
+addEventListener("resize", ()=>render());
+
+function load(){ N = prep(D.networks[S.net]); S.seed = N.raw.centrality.indexOf(N.cmax); setX(S.x); lamInit(); epiReset(); render(); }
+function render(){ ({intro:rIntro,lens:rLens,curves:rCurves,auc:rAuc,epi:rEpi,lam:rLam})[S.tab](); }
+
+/* ---------- Overview ---------- */
+function rIntro(){
+  const r=N.raw, mt=r.meta;
+  $("intro-stats").innerHTML = [[r.nodes.length,"nodes"],[N.m,"edges"],[N.metricK,"metric-backbone edges"],[(100*N.metricX).toFixed(2)+"%","metric X (paper "+mt.paper_metric_X_percent+"%)"],[r.beta.toFixed(2),"calibrated β"],["λ "+fmt(mt.balanced_lambda_opt),"balanced optimum"]]
+    .map(([a,b])=>`<div class="stat"><b>${a}</b><span>${b}</span></div>`).join("");
+  const own = r.auc_own, fix = r.auc_fixed, best = (t,k)=>t.method[t[k].indexOf(Math.max(...t[k]))];
+  const row = (t,l)=>`<tr><td>${l}</td><td>${best(t,"AUC_rho_C")}</td><td>${best(t,"AUC_rho_t")}</td><td>${best(t,"AUC_xi")}</td></tr>`;
+  $("headline").innerHTML = `<table><tr><th>Best method by AUC</th><th>ρ<sub>C</sub></th><th>ρ<sub>t</sub></th><th>ξ⁻¹</th></tr>${row(own,"each method's own X̃")}${row(fix,"same limit X̃ = metric size")}</table>
+   <div class="note" style="margin-top:8px">The winner depends on the integration limit: with its own X̃, W and DispFilt are only judged where they are still connected. With a common limit, DBS / SmD / wEffRes lead on spreading – the pattern of the paper.</div>`;
+}
+
+/* ---------- Network lens ---------- */
+function rLens(){
+  const multi = $("lens-all").checked; $("lens-single").style.display = multi?"none":""; $("lens-multi").style.display = multi?"":"none";
+  const sm = (m,X)=>({...N.rhoC(m,X), ...N.si(m,X)});
+  if(!multi){
+    const m=$("lens-m").value, m2=$("lens-m2").value, keep=N.keep(m,S.x), keep2=m2&&m2!==m?N.keep(m2,S.x):null;
+    S.lensKeep=keep; S.lensKeep2=keep2; S.lensM=m; S.lensM2=keep2?m2:null;
+    const cp=drawGraph($("lens-c"),keep,{color:COL[m],showRemoved:$("lens-removed").checked,h:560,hl:S.hl,keep2,color2:COL[m2]});
+    const q=sm(m,S.x);
+    let both=0; if(keep2) for(let e=0;e<N.m;e++) if(keep[e]&&keep2[e]) both++;
+    const k=N.kOf(S.x);
+    $("lens-stats").innerHTML=(keep2 ? [[both,"edges kept by both (grey)"],[k-both,`only ${m} (${m} colour)`],[k-both,`only ${m2} (${m2} colour)`],[(100*both/(2*k-both)).toFixed(0)+"%","edge overlap (Jaccard)"],[fmt(q.rho_t),"ρ_t of "+m],[fmt(sm(m2,S.x).rho_t),"ρ_t of "+m2]]
+      : [[k,"edges kept"],[cp.count,"components"],[cp.main+" / "+N.n,"nodes in main component"],[fmt(q.rho),"ρ_C"],[fmt(q.rho_t),"ρ_t"],[fmt(q.xi),"ξ⁻¹"]])
+      .map(([a,b])=>`<div class="stat"><b${b==="components"&&a>1?' class="bad"':''}>${a}</b><span>${b}</span></div>`).join("");
+  } else {
+    const box=$("lens-multi"); if(box.children.length!==M.length){ box.innerHTML=M.map(m=>`<div class="cell"><div><b style="color:${COL[m]}">${m}</b><span id="lm-${m}"></span></div><canvas id="lc-${m}" height="230"></canvas></div>`).join(""); }
+    const out=[]; M.forEach(m=>{ const cp=drawGraph($("lc-"+m),N.keep(m,S.x),{color:COL[m],showRemoved:$("lens-removed").checked,h:230,small:true}); const q=sm(m,S.x);
+      $("lm-"+m).innerHTML=`${cp.count} comp · ρ<sub>t</sub> ${fmt(q.rho_t,2)} · ρ<sub>C</sub> ${fmt(q.rho,2)}`; });
+    $("lens-stats").innerHTML=`<div class="note">${N.kOf(S.x)} edges kept by every method (X = ${S.x.toFixed(3)}).</div>`;
+  }
+}
+
+/* ---------- Curves ---------- */
+function rCurves(){
+  legendInto($("cur-legend")); const r=N.raw;
+  const defs=[["ch-rc","rho","ρ_C  (centrality rank)"],["ch-rt","rho_t","ρ_t  (infection-order rank)"],["ch-xi","xi","ξ⁻¹ (spreading speed)"]];
+  defs.forEach(([id,key,lab])=>{
+    const series=M.map(m=>{ const src=key==="rho"?r.rho[m]:r.si[m], ys=key==="rho"?src.rho_C:src[key], f=interp(src.X,ys), xc=r.meta.X_conn[m], lo=Math.max(xc,N.metricX);
+      return {name:m,color:COL[m],dash:DASH[m],x:src.X,y:ys,at:f,dots:[[lo,f(lo)]]}; });
+    lineChart($(id),{series,xlim:[0,1],ylim:[0,1],xlabel:"adjusted size X",ylabel:lab,cursor:S.x,h:300,hoverX:v=>"X = "+v.toFixed(3),onClick:v=>{setX(v);render();}});
+  });
+  $("cur-table").innerHTML=`<table><tr><th>at X = ${S.x.toFixed(3)}</th><th>ρ_C</th><th>ρ_t</th><th>ξ⁻¹</th><th>components</th></tr>`+M.map(m=>{const a=N.rhoC(m,S.x),b=N.si(m,S.x);
+    return `<tr><td style="color:${COL[m]}"><b>${m}</b></td><td>${fmt(a.rho)}</td><td>${fmt(b.rho_t)}</td><td>${fmt(b.xi)}</td><td${a.comps>1?' class="bad"':''}>${a.comps}</td></tr>`;}).join("")+"</table>";
+}
+
+/* ---------- AUC ---------- */
+function barChart(c, groups, series, o){      // groups: labels; series: [{name,color,vals[]}]
+  const [g,w,h]=setup(c,o.h), L=44,R=10,T=18,B=34, y0=o.y0, y1=1.0, Y=v=>h-B-(v-y0)/(y1-y0)*(h-B-T);
+  g.clearRect(0,0,w,h); g.font="12px system-ui"; g.fillStyle=css("--ink2"); g.strokeStyle=css("--grid");
+  for(let i=0;i<=4;i++){const v=y0+(y1-y0)*i/4,y=Y(v);g.beginPath();g.moveTo(L,y);g.lineTo(w-R,y);g.stroke();g.textAlign="right";g.fillText(v.toFixed(2),L-6,y+4);}
+  const gw=(w-L-R)/groups.length, bw=Math.min(40,gw*.8/series.length); c._bars=[];
+  groups.forEach((lab,gi)=>{ const cx=L+gw*(gi+.5); g.textAlign="center"; g.fillStyle=css("--ink"); g.fillText(lab,cx,h-10);
+    series.forEach((s,si)=>{ const v=s.vals[gi], x=cx+(si-(series.length-1)/2)*bw*1.1-bw/2; c._bars.push({x,w:bw,name:s.name,lab,v}); g.fillStyle=s.color; g.fillRect(x,Y(Math.max(v,y0)),bw,Y(y0)-Y(Math.max(v,y0)));
+      g.fillStyle=css("--ink"); g.font="11px system-ui"; g.fillText(v.toFixed(2),x+bw/2,Y(Math.max(v,y0))-4); g.font="12px system-ui"; }); });
+}
+(function(){ const c=$("auc-c"); c.addEventListener("mousemove",ev=>{ const r=c.getBoundingClientRect(), x=ev.clientX-r.left; const b=(c._bars||[]).find(b=>x>=b.x&&x<=b.x+b.w); if(b) showTip(ev,`${b.name}
+${b.lab}  ${b.v.toFixed(4)}`); else hideTip(); }); c.addEventListener("mouseleave",hideTip); })();
+function rAuc(){
+  const own=$("auc-mode").value==="own", t=own?N.raw.auc_own:N.raw.auc_fixed, y0=$("auc-zoom").checked?.6:0;
+  const meas=[["AUC_rho_C","ρ_C"],["AUC_rho_t","ρ_t"],["AUC_xi","ξ⁻¹"]], idx=m=>t.method.indexOf(m);
+  barChart($("auc-c"),meas.map(a=>a[1]),M.map(m=>({name:m,color:COL[m],vals:meas.map(a=>t[a[0]][idx(m)])})),{h:340,y0});
+  const hi=meas.map(a=>Math.max(...t[a[0]]));
+  $("auc-table").innerHTML=`<table><tr><th>method</th><th>X̃</th>${meas.map(a=>`<th>${a[1]}</th>`).join("")}</tr>`+M.map(m=>`<tr><td style="color:${COL[m]}"><b>${m}</b></td><td>${fmt(t.X_tilde[idx(m)])}</td>${meas.map((a,i)=>{const v=t[a[0]][idx(m)];return `<td${v===hi[i]?' style="font-weight:700"':''}>${fmt(v)}</td>`;}).join("")}</tr>`).join("")+"</table>";
+  const sum=own?D.summary_own:D.summary_fixed, many=sum && new Set(sum.network).size>1; $("auc-all-card").style.display=many?"":"none";
+  if(many){ const c=$("auc-all"), [g,w,h]=setup(c,320), L=44,R=10,T=14,B=30, Y=v=>h-B-(v-.4)/(.6)*(h-B-T); g.clearRect(0,0,w,h); g.font="12px system-ui";
+    for(let i=0;i<=3;i++){const v=.4+.6*i/3;g.strokeStyle=css("--grid");g.beginPath();g.moveTo(L,Y(v));g.lineTo(w-R,Y(v));g.stroke();g.fillStyle=css("--ink2");g.textAlign="right";g.fillText(v.toFixed(2),L-6,Y(v)+4);}
+    const gw=(w-L-R)/3, nets=[...new Set(sum.network)];
+    meas.forEach(([k,lab],gi)=>{ g.fillStyle=css("--ink");g.textAlign="center";g.fillText(lab,L+gw*(gi+.5),h-8);
+      M.forEach((m,mi)=>{ const x=L+gw*(gi+.5)+(mi-2)*gw/6; nets.forEach((n,ni)=>{ for(let r=0;r<sum.method.length;r++) if(sum.method[r]===m&&sum.network[r]===n){ const hl=n===S.net;
+        g.fillStyle=COL[m]; g.globalAlpha=hl?1:.45; g.beginPath(); g.arc(x+(ni-(nets.length-1)/2)*5,Y(clamp(sum[k][r],.4,1)),hl?5:3.5,0,6.283); g.fill(); g.globalAlpha=1; }}); }); });
+  }
+}
+$("auc-mode").onchange=$("auc-zoom").onchange=rAuc;
+
+/* ---------- Epidemic (SI simulated in the browser) ---------- */
+function adjOf(keep){ const adj=Array.from({length:N.n},()=>[]); for(let e=0;e<N.m;e++) if(keep[e]){ adj[N.u[e]].push([N.v[e],N.p[e]]); adj[N.v[e]].push([N.u[e],N.p[e]]); } return adj; }
+function sim(adj, seed, tmax=150){ const t=new Float32Array(N.n).fill(Infinity); t[seed]=0; let inf=[seed];
+  for(let s=1;s<=tmax&&inf.length;s++){ const nw=[]; for(const i of inf) for(const [j,p] of adj[i]) if(t[j]===Infinity&&Math.random()<Math.min(1,N.raw.beta*S.bm*p)){t[j]=s;nw.push(j);}
+    const seen=new Set(); const add=[]; for(const j of nw) if(!seen.has(j)){seen.add(j);add.push(j);}
+    // nodes infected this step stay in the frontier; already-infected nodes keep trying (SI): rebuild list
+    inf=inf.concat(add); if(add.length===0&&inf.every(i=>adj[i].every(([j])=>t[j]<Infinity))) break; }
+  return t; }
+const half = t => { const a=Array.from(t).filter(v=>v<Infinity).sort((x,y)=>x-y), k=Math.ceil(N.n/2); return a.length>=k?a[k-1]:Infinity; };
+function curve(adj,seed,runs=60,T=100){ const f=new Float64Array(T+1), hs=[]; for(let r=0;r<runs;r++){ const t=sim(adj,seed,T); hs.push(half(t)); for(const v of t) if(v<Infinity) for(let s=Math.ceil(v);s<=T;s++) f[s]++; }
+  hs.sort((a,b)=>a-b); return {f:Array.from(f,v=>v/runs/N.n), med:hs[Math.floor(runs/2)]}; }
+const E = {playing:false, t:0, timer:null};
+function epiReset(){ E.t=0; E.runs=null; E.stale=null; }
+function epiPrepare(){ const m=$("epi-m").value, keepB=N.keep(m,S.x), keepA=new Uint8Array(N.m).fill(1);
+  const aA=adjOf(keepA), aB=adjOf(keepB);
+  E.A=sim(aA,S.seed,150); E.B=sim(aB,S.seed,150); E.keepB=keepB; E.m=m;
+  const cA=curve(aA,S.seed), cB=curve(aB,S.seed); E.cA=cA; E.cB=cB; E.cp=N.comps(keepB); }
+function epiRacePrepare(){ const aA=adjOf(new Uint8Array(N.m).fill(1)); E.rc={orig:{keep:new Uint8Array(N.m).fill(1),times:sim(aA,S.seed,150),curve:curve(aA,S.seed)}};
+  M.forEach(m=>{ const keep=N.keep(m,S.x), adj=adjOf(keep); E.rc[m]={keep,times:sim(adj,S.seed,150),curve:curve(adj,S.seed),cp:N.comps(keep)}; }); }
+function rEpi(){
+  const race=$("epi-race").checked, key=[S.net,S.seed,$("epi-m").value,S.x.toFixed(3),race,S.bm].join("|");
+  if(E.stale!==key){ E.stale=key; E.t=0; race?epiRacePrepare():epiPrepare(); }
+  $("epi-single").style.display=race?"none":""; $("epi-multi").style.display=race?"":"none";
+  const T=[...Array(101).keys()], card=(a,b)=>`<div class="stat"><b>${a}</b><span>${b}</span></div>`;
+  if(race){ drawRace(); const o=E.rc.orig.curve.med;
+    $("epi-stats").innerHTML=`<table style="grid-column:1/-1"><tr><th>method (same seed, X = ${S.x.toFixed(3)})</th><th>components</th><th>half-infection step</th><th>ξ⁻¹</th></tr>`+
+      M.map(m=>[m,E.rc[m]]).sort((a,b)=>a[1].curve.med-b[1].curve.med).map(([m,r])=>`<tr><td style="color:${COL[m]}"><b>${m}</b></td><td${r.cp.count>1?' class="bad"':''}>${r.cp.count}</td><td>${r.curve.med===Infinity?"never":r.curve.med}</td><td>${r.curve.med===Infinity?"≈ 0":fmt(o/r.curve.med,2)}</td></tr>`).join("")+`</table>`;
+    $("epi-leg").innerHTML=`<span><b style="color:#8d9bb0">━ original (half-infection step ${o})</b></span>`+M.map(m=>`<span><b style="color:${COL[m]}">╍ ${m}</b></span>`).join("")+`<span>closest to the grey line = most faithful</span>`;
+    lineChart($("epi-curve"),{series:[{name:"Original",color:"#8d9bb0",w:3.5,x:T,y:E.rc.orig.curve.f,at:i=>E.rc.orig.curve.f[Math.round(i)]},...M.map(m=>({name:m,color:COL[m],dash:DASH[m],x:T,y:E.rc[m].curve.f,at:i=>E.rc[m].curve.f[Math.round(i)]}))],
+      xlim:[0,100],ylim:[0,1],xticks:[0,20,40,60,80,100],xlabel:"step",ylabel:"fraction infected (mean of 60 runs)",cursor:E.t,h:260,hoverX:v=>"step "+Math.round(v)});
+    return; }
+  drawEpi(); const xi=E.cA.med/E.cB.med;
+  $("epi-bt").textContent = E.m+" backbone, X = "+S.x.toFixed(3);
+  $("epi-stats").innerHTML=[[N.kOf(S.x)+" / "+N.m,"edges kept"],[E.cp.count,"components"],[fmt(E.cA.med,0),"half-infection step, original"],[E.cB.med===Infinity?"never":fmt(E.cB.med,0),"half-infection step, backbone"],[E.cB.med===Infinity?"≈ 0":fmt(xi,2),"ξ⁻¹ (this seed, 60 runs)"]].map(([a,b])=>card(a,b)).join("");
+  $("epi-leg").innerHTML=`<span><b style="color:#8d9bb0">━ original</b></span><span><b style="color:${COL[E.m]}">╍ ${E.m} backbone</b></span><span>dashed vertical line = playback position</span>`;
+  lineChart($("epi-curve"),{series:[{name:"Original",color:"#8d9bb0",w:3,x:T,y:E.cA.f,at:i=>E.cA.f[Math.round(i)]},{name:E.m+" backbone",color:COL[E.m],dash:[6,3],x:T,y:E.cB.f,at:i=>E.cB.f[Math.round(i)]}],
+    xlim:[0,100],ylim:[0,1],xticks:[0,20,40,60,80,100],xlabel:"step",ylabel:"fraction infected (mean of 60 runs)",cursor:E.t,h:260,hoverX:v=>"step "+Math.round(v)});
+}
+function drawRace(){
+  const box=$("epi-multi"), ids=["orig",...M];
+  if(box.children.length!==ids.length) box.innerHTML=ids.map(m=>`<div class="cell"><div><b style="color:${m==="orig"?"#8d9bb0":COL[m]}">${m==="orig"?"Original":m}</b><span id="rn-${m}"></span></div><canvas id="rc-${m}" height="230"></canvas></div>`).join("");
+  ids.forEach(m=>{ const r=E.rc[m], c=$("rc-"+m);
+    drawGraph(c,r.keep,{color:m==="orig"?"#8d9bb0":COL[m],showRemoved:false,h:230,small:true,nodeColor:i=>i===S.seed?css("--seed"):(r.times[i]<=E.t?css("--hot"):css("--sus"))});
+    $("rn-"+m).textContent=Array.from(r.times).filter(v=>v<=E.t).length+" infected"; });
+}
+function drawEpi(){
+  const paint=(c,keep,times,col)=>drawGraph(c,keep,{color:col,showRemoved:false,h:420,nodeColor:i=>i===S.seed?css("--seed"):(times[i]<=E.t?css("--hot"):css("--sus"))});
+  paint($("epi-a"),new Uint8Array(N.m).fill(1),E.A,"#8d9bb0"); paint($("epi-b"),E.keepB,E.B,COL[E.m]);
+  $("epi-t1").textContent=$("epi-t2").textContent=Math.floor(E.t);
+  const lbl=(c,times)=>{const g=c.getContext("2d");g.fillStyle=css("--ink2");g.font="12px system-ui";g.textAlign="left";g.fillText(Array.from(times).filter(v=>v<=E.t).length+" infected",8,16);};
+  lbl($("epi-a"),E.A); lbl($("epi-b"),E.B);
+}
+["epi-a","epi-b"].forEach(id=>$(id).addEventListener("click",ev=>{ const c=$(id), r=c.getBoundingClientRect(), x=ev.clientX-r.left, y=ev.clientY-r.top;
+  let best=-1,bd=1e9; (c._P||[]).forEach((p,i)=>{const d=(p[0]-x)**2+(p[1]-y)**2; if(d<bd){bd=d;best=i;}}); if(best>=0&&bd<900){ S.seed=best; render(); } }));
+$("epi-multi").addEventListener("click",ev=>{ const c=ev.target.closest("canvas"); if(!c||!c._P) return; const r=c.getBoundingClientRect(), x=ev.clientX-r.left, y=ev.clientY-r.top;
+  let best=-1,bd=1e9; c._P.forEach((p,i)=>{const d=(p[0]-x)**2+(p[1]-y)**2; if(d<bd){bd=d;best=i;}}); if(best>=0&&bd<400){ S.seed=best; render(); } });
+$("epi-m").onchange=()=>{ epiReset(); render(); };
+$("epi-race").onchange=()=>{ E.t=0; render(); };
+$("epi-beta").oninput=e=>{ S.bm=+e.target.value; $("epi-bv").textContent=S.bm.toFixed(2); render(); };
+$("epi-new").onclick=()=>{ E.stale=null; render(); };
+$("epi-play").onclick=()=>{ E.playing=!E.playing; $("epi-play").textContent=E.playing?"❚❚ pause":"▶ play"; if(E.playing) tick(); };
+function tick(){ if(!E.playing||S.tab!=="epi"){E.playing=false;$("epi-play").textContent="▶ play";return;} E.t+= $("epi-sp").value/30; if(E.t>100) E.t=0; rEpi(); requestAnimationFrame(tick); }
+
+/* ---------- λ study ---------- */
+const LAMS = {min:0.1, max:20};
+function lamFromSlider(v){ return v>=1000 ? Infinity : LAMS.min*Math.pow(LAMS.max/LAMS.min, v/999); }
+function lamInit(){ $("lam-s").value=(Math.log(1/LAMS.min)/Math.log(LAMS.max/LAMS.min))*999; }
+function lamRow(L){ const t=N.raw.lam_sweep; let best=0,bd=1e9; t.lam.forEach((v,i)=>{ const a=v==="inf"?(L===Infinity?0:1e9):(L===Infinity?1e9:Math.abs(Math.log(v)-Math.log(L))); if(a<bd){bd=a;best=i;} }); return {rho_C:t.rho_C[best],rho_t:t.rho_t[best],xi:t.xi[best],X:t.X[best],k:t.n_edges[best]}; }
+const W = {C:.25,t:.25,xi:.25,X:.25};
+function wOpt(){ const t=N.raw.lam_sweep; let best=-1,bv=-1e9; t.lam.forEach((l,i)=>{ const v=W.C*t.rho_C[i]+W.t*t.rho_t[i]+W.xi*t.xi[i]+W.X*(1-t.X[i]); if(v>bv){bv=v;best=i;} }); return {i:best,lam:num(t.lam[best]),v:bv}; }
+(function(){ const p=$("w-pre"); Object.keys(D.scenarios).forEach(k=>p.add(new Option(k,k)));
+  [["C","w_C (ρ_C)"],["t","w_t (ρ_t)"],["xi","w_ξ (ξ⁻¹)"],["X","w_X (small size)"]].forEach(([k,l])=>{ const d=document.createElement("label"); d.innerHTML=`${l} <input type="range" id="w-${k}" min="0" max="1" step="0.01" style="width:140px"> <b id="wv-${k}"></b>`; $("w-sliders").append(d);
+    d.querySelector("input").oninput=e=>{ W[k]=+e.target.value; $("w-pre").selectedIndex=-1; rLam(); }; });
+  p.onchange=()=>{ const v=D.scenarios[p.value]; ["C","t","xi","X"].forEach((k,i)=>W[k]=v[i]); rLam(); }; p.value="Balanced"; p.onchange(); })();
+$("lam-s").oninput=rLam;
+$("lam-mst").onclick=()=>{ $("lam-s").value=1000; rLam(); };
+$("lam-1").onclick=()=>{ $("lam-s").value=(Math.log(1/LAMS.min)/Math.log(LAMS.max/LAMS.min))*999; rLam(); };
+function rLam(){
+  if(S.tab!=="lam") return;
+  const L=lamFromSlider(+$("lam-s").value), [keep,k]=N.keepLam(L), t=N.raw.lam_sweep, row=lamRow(L), opt=wOpt();
+  $("lam-v").textContent = L===Infinity?"∞ (spanning tree)":L.toFixed(3);
+  const cp=drawGraph($("lam-g"),keep,{color:COL.DBS,showRemoved:true,h:420});
+  const xs=t.lam.map(v=>v==="inf"?LAMS.max*1.0001:v), fin=t.lam.map((v,i)=>i).filter(i=>t.lam[i]!=="inf");
+  const mk=(name,color,dash,key,tr)=>({name,color,dash,x:fin.map(i=>xs[i]),y:fin.map(i=>tr?tr(t[key][i]):t[key][i]),at:v=>{const f=interp(fin.map(i=>xs[i]),fin.map(i=>tr?tr(t[key][i]):t[key][i]));return f(v);}});
+  lineChart($("lam-c"),{series:[mk("ρ_C","#2a78d6",[],"rho_C"),mk("ρ_t","#eb6834",[7,4],"rho_t"),mk("ξ⁻¹","#1baf7a",[2,3],"xi"),mk("1 − X",css("--ink2"),[10,3],"X",v=>1-v)],
+    xlim:[LAMS.min,LAMS.max],ylim:[0,1],logx:true,xticks:[.1,.3,1,3,10,20],xlabel:"λ (log scale)",ylabel:"value",cursor:L===Infinity?LAMS.max:L,band:[.2,.4],h:420,hoverX:v=>"λ = "+v.toFixed(2),
+    marks:opt.lam===Infinity?[]:[{x:opt.lam,y:Math.min(1,opt.v)}],onClick:v=>{ $("lam-s").value=Math.log(v/LAMS.min)/Math.log(LAMS.max/LAMS.min)*999; rLam(); }});
+  $("lam-stats").innerHTML=[[k+" / "+N.m,"edges kept"],[(100*k/N.m).toFixed(0)+"%","of all edges"],[cp.count,"components"],[fmt(row.rho_C),"ρ_C"],[fmt(row.rho_t),"ρ_t"],[fmt(row.xi),"ξ⁻¹"]].map(([a,b])=>`<div class="stat"><b>${a}</b><span>${b}</span></div>`).join("");
+  ["C","t","xi","X"].forEach(q=>{ $("w-"+q).value=W[q]; $("wv-"+q).textContent=W[q].toFixed(2); });
+  const r=t, i=opt.i;
+  $("w-out").innerHTML=[["λ = "+fmt(opt.lam,3),"optimal λ (★ on chart)"],[r.n_edges[i],"edges"],[fmt(r.X[i]),"X"],[fmt(r.rho_C[i]),"ρ_C"],[fmt(r.rho_t[i]),"ρ_t"],[fmt(r.xi[i]),"ξ⁻¹"]].map(([a,b])=>`<div class="stat"><b>${a}</b><span>${b}</span></div>`).join("");
+}
+function rLamTab(){ rLam(); }
+
+
+/* ---------- extra interactivity: hover, compare, keyboard ---------- */
+M.forEach(m=>$("lens-m2").add(new Option(m,m)));
+$("lens-m2").onchange=render;
+$("lens-m").addEventListener("change",()=>{ if($("lens-m2").value===$("lens-m").value) $("lens-m2").value=""; });
+(function(){ const c=$("lens-c");
+  c.addEventListener("mousemove",ev=>{ const P=c._P, keep=S.lensKeep; if(!P||!keep) return; const r=c.getBoundingClientRect(), x=ev.clientX-r.left, y=ev.clientY-r.top;
+    let bn=-1,bd=1e9; P.forEach((p,i)=>{ const d=(p[0]-x)**2+(p[1]-y)**2; if(d<bd){bd=d;bn=i;} });
+    const k2=S.lensKeep2, inc=e=>keep[e]||(k2&&k2[e]);
+    if(bd<225){ let deg=0; for(let e=0;e<N.m;e++) if(keep[e]&&(N.u[e]===bn||N.v[e]===bn)) deg++; let full=0; for(let e=0;e<N.m;e++) if(N.u[e]===bn||N.v[e]===bn) full++;
+      showTip(ev,`node ${N.raw.nodes[bn]}
+centrality  ${fmt(N.raw.centrality[bn]/N.cmax,2)} (rel.)
+edges kept  ${deg} of ${full}`);
+      if(S.hl!==bn){ S.hl=bn; rLens(); } return; }
+    let be=-1,ed=36; for(let e=0;e<N.m;e++){ if(!inc(e)) continue; const [ax,ay]=P[N.u[e]], [bx,by]=P[N.v[e]], dx=bx-ax, dy=by-ay, L2=dx*dx+dy*dy||1, t=clamp(((x-ax)*dx+(y-ay)*dy)/L2,0,1), d=(x-ax-t*dx)**2+(y-ay-t*dy)**2; if(d<ed){ed=d;be=e;} }
+    if(be>=0){ showTip(ev,`${N.raw.nodes[N.u[be]]} – ${N.raw.nodes[N.v[be]]}
+proximity   ${fmt(N.p[be],4)}
+distortion  ${fmt(N.raw.edges.s[be],2)}${N.raw.edges.s[be]<=1+1e-6?"  (metric edge)":""}
+λ           ${fmt(N.lam[be],3)}
+`+(S.lensM+": "+(keep[be]?"kept":"removed"))+(S.lensM2?`
+${S.lensM2}: ${k2[be]?"kept":"removed"}`:"")); }
+    else hideTip();
+    if(S.hl!=null){ S.hl=null; rLens(); } });
+  c.addEventListener("mouseleave",()=>{ hideTip(); if(S.hl!=null){ S.hl=null; rLens(); } });
+})();
+$("lens-multi").addEventListener("click",ev=>{ const cell=ev.target.closest(".cell"); if(!cell) return; const m=cell.querySelector("canvas").id.slice(3); $("lens-m").value=m; $("lens-all").checked=false; render(); });
+$("lens-multi").addEventListener("mouseover",ev=>{ const cell=ev.target.closest(".cell"); $("lens-multi").style.cursor=cell?"pointer":""; });
+document.addEventListener("keydown",ev=>{ if(["SELECT","TEXTAREA"].includes(ev.target.tagName)||(ev.target.tagName==="INPUT"&&ev.target.type!=="range"&&ev.target.type!=="checkbox")) return;
+  if(!["lens","curves","epi","auc"].includes(S.tab)) return; const d=ev.shiftKey?.05:.005;
+  if(ev.key==="ArrowRight"){ setX(S.x+d); ev.preventDefault(); render(); } if(ev.key==="ArrowLeft"){ setX(S.x-d); ev.preventDefault(); render(); } });
+document.addEventListener("keydown",ev=>{ if(ev.target.tagName==="INPUT"||ev.target.tagName==="SELECT") return; const i=+ev.key; if(i>=1&&i<=TABS.length) go(TABS[i-1][0]); });
+
+/* ---------- boot ---------- */
+const _go = go;
+load();
+{ const h=location.hash.slice(1); go(TABS.some(t=>t[0]===h)?h:"intro"); }
+</script>
 </body>
 </html>

@@ -7,7 +7,7 @@ from the stored results, and presents everything in an interactive UI.
 
 **Full documentation (status, flow, datasets, methods, measures, every command): [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md).
 What to do next, in order: [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md). The base paper, summarised with page quotes:
-[docs/BASE_PAPER.md](docs/BASE_PAPER.md).**
+[docs/BASE_PAPER.md](docs/BASE_PAPER.md). Possible extensions of it: [docs/EXTENSIONS.md](docs/EXTENSIONS.md).**
 
 ## Layout
 ```
@@ -57,10 +57,11 @@ python run.py advise --network hospital --q 0.2 --weights spread=0.7 comm=0.3
 python run.py advise --edgelist my_network.csv --q 0.2     # u,v,weight columns; computed live
 ```
 
-## UI
+## UI (interactive dashboard)
 ```
-python -m http.server -d ui 8000      # open http://localhost:8000
-python run.py ui-check                # headless smoke test, screenshots in results/ui_shots/
+python -m backbone.export            # results/<network>/*.csv -> ui/data.js (needs python run.py first)
+python -m http.server -d ui 8000     # open http://localhost:8000  (ui/index.html also opens straight from disk)
 ```
-Dependency-free; no build step or Node needed. Screens: Arena, Failure atlas, Curves, Mechanism bench,
-Network lens, Spread theatre, Conclusions, Advisor.
+Dependency-free (vanilla JS + canvas, no build step). Tabs: Overview, Network lens (X slider, five methods, compare-all),
+Curves, AUC (own X-tilde vs common limit), Epidemic (SI simulated live in the browser, click a node to seed),
+and a lambda study with live Eq. 17 weights.

@@ -5,7 +5,8 @@ Work through the steps in order and tick the boxes. Each step says why it matter
 to change), and how you know it is done.
 
 Read first: [DOCUMENTATION.md](DOCUMENTATION.md) (what exists) and [BASE_PAPER.md](BASE_PAPER.md) (what the base
-paper does, with page quotes).
+paper does, with page quotes). The full list of possible extensions, with the reason, hypothesis and
+code for each, is in [EXTENSIONS.md](EXTENSIONS.md) (it is organised by extension, X1 to X14, not by the step numbers below).
 
 ## The project in one paragraph
 
